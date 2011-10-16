@@ -1,6 +1,5 @@
 require 'renee-core'
 require 'renee-render'
-
 require 'renee/version'
 
 class Renee
