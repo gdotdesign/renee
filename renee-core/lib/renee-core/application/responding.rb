@@ -29,7 +29,7 @@ class Renee
         # @param [Object...] response The response to use.
         # @see #interpret_response
         def halt(*response)
-          raise "PATH_INFO hasn't been entirely consumed, you still have #{env['PATH_INFO'].inspect} left. Try putting a #remainder block around it. " if env['PATH_INFO'] != ''
+          raise "PATH_INFO hasn't been entirely consumed, you still have #{env['PATH_INFO'].inspect} left. Try putting a #remainder block around it, or, if you don't care about entirely consuming your path_info, use #halt!" unless env['PATH_INFO'] == ''
           halt! *response
         end
 
