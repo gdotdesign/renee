@@ -51,7 +51,7 @@ class Renee
     #
     # @api public
     def setup(path = nil, &blk)
-      raise "Must be either path or blk to configure settings" if path && blk
+      raise "You cannot supply both an argument and a block to the method." unless path.nil? ^ blk.nil?
       case path
       when nil      then settings.instance_eval(&blk)
       when Settings then @settings = path
