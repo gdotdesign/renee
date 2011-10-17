@@ -140,13 +140,13 @@ describe Renee::Core::Application::Routing do
         end
 
         path 'two' do
-          variable do |foo, bar|
+          var.var do |foo, bar|
             get { halt [200, type,["#{foo}-#{bar}"]] }
           end
         end
 
         path 'multi' do
-          variable do |foo, bar, lol|
+          multi_var(3) do |foo, bar, lol|
             post { halt [200, type,["#{foo}-#{bar}-#{lol}"]] }
           end
         end
@@ -167,13 +167,13 @@ describe Renee::Core::Application::Routing do
       type = { 'Content-Type' => 'text/plain' }
       mock_app do
         path 'test' do
-          var do  |id|
+          var do |id|
             path 'moar' do
               post { halt [200, type, [id]] }
             end
 
             path 'more' do
-              var do |foo, bar|
+              var.var do |foo, bar|
                 get { halt [200, type, ["#{foo}-#{bar}"]] }
 
                 path 'woo' do
@@ -200,7 +200,7 @@ describe Renee::Core::Application::Routing do
       type = { 'Content-Type' => 'text/plain' }
       mock_app do
         path 'add' do
-          variable Integer do |a, b|
+          var(Integer).var(Integer) do |a, b|
             halt [200, type, ["#{a + b}"]]
           end
         end
@@ -249,7 +249,7 @@ describe Renee::Core::Application::Routing do
       type = { 'Content-Type' => 'text/plain' }
       mock_app do
         path 'add' do
-          variable /foo|bar/ do |a, b|
+          var(/foo|bar/).var(/foo|bar/) do |a, b|
             halt [200, type, ["#{a + b}"]]
           end
         end
