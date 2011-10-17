@@ -240,8 +240,6 @@ class Renee
         end
 
         private
-        NilProxy = Class.new { def method_missing(m, *args, &blk); end }.new
-
         class ChainingProxy
           def initialize(target, proxy_blk)
             @target, @proxy_blk, @calls = target, proxy_blk, []
