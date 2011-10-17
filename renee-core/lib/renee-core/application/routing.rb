@@ -75,37 +75,21 @@ class Renee
         #   GET /test/hey/there  #=> [200, {}, 'hey-there']
         #
         # @api public
-        def variable(*args, &blk)
-          args << {} unless args.last.is_a?(Hash)
-          args.last[:prefix] = '/'
-          partial_variable(*args, &blk)
+        def variable(type = nil, &blk)
+          complex_variable(type, '/', false, &blk)
         end
         alias_method :var, :variable
+
+        def repeating_variable(type = nil, &blk)
+          complex_variable(type, '/', true, &blk)
+        end
+        alias_method :glob, :repeating_variable
 
         # Match parts off the path as variables without a leading slash.
         # @see #variable
         # @api public
-        def partial_variable(*args, &blk)
-          opts = args.last.is_a?(Hash) ? args.pop : nil
-          prefix = opts && opts[:prefix] || ''
-          repeat = opts && opts.key?(:repeat) ? opts[:repeat] : false
-          blk.arity.times {|i| args[i] ||= args.last}
-          args << nil if args.empty?
-          patterns = args.map do |type|
-            if type == Integer
-              INTERGER_VARIABLE_PATTERN
-            elsif type == nil or type == String
-              VariablePatterns.new(detected_extension ?
-                /((?:[^\/](?!#{Regexp.quote(detected_extension)}$))+)(?=$|\/|\.#{Regexp.quote(detected_extension)})/ :
-                /([^\/]+)(?=$|\/)/
-              )
-            elsif type.is_a?(Regexp)
-              VariablePatterns.new(/(#{type.to_s})/)
-            else
-              raise "Unexpected variable type #{type.inspect}"
-            end
-          end
-          complex_variable(patterns, prefix, repeat, &blk)
+        def partial_variable(type = nil, repeat = false, &blk)
+          complex_variable(type, nil, repeat, &blk)
         end
         alias_method :part_var, :partial_variable
 
@@ -241,27 +225,34 @@ class Renee
         VariablePatterns = Struct.new(:pattern, :transformer)
         INTERGER_VARIABLE_PATTERN = VariablePatterns.new(/(\d+)/, proc{|v| Integer(v)})
 
-        def complex_variable(patterns, prefix, repeat, &blk)
-          pattern_index = 0
+        def complex_variable(type, prefix, repeat, &blk)
+          transformer = nil
+          pattern = if type == Integer
+            transformer = proc{|v| Integer(v)}
+            /\d+/
+          elsif type == nil or type == String
+            detected_extension ?
+              /(([^\/](?!#{Regexp.quote(detected_extension)}$))+)(?=$|\/|\.#{Regexp.quote(detected_extension)})/ :
+              /([^\/]+)(?=$|\/)/
+          elsif type.is_a?(Regexp)
+            type
+          else
+            raise "Unexpected variable type #{type.inspect}"
+          end
           path = env['PATH_INFO'].dup
           vals = []
-          until pattern_index == patterns.size
-            matcher = /^#{Regexp.quote(prefix)}#{patterns[pattern_index].pattern.to_s}/
-            return unless match = matcher.match(path)
-            path.slice!(0, match[0].size)
-            val = match[0][prefix.size, match[0].size]
-            vals << (patterns.last.transformer ? patterns.last.transformer[val] : val)
-            if pattern_index == patterns.size - 1 and repeat
-              vals << [vals.pop]
-              while match = matcher.match(path)
-                path.slice!(0, match[0].size)
-                val = match[0][prefix.size, match[0].size]
-                vals.last << (patterns.last.transformer ? patterns.last.transformer[val] : val)
-              end
+          var_index = 0
+          matcher = /^#{prefix && Regexp.quote(prefix)}#{pattern.to_s}/
+          until var_index == blk.arity
+            unless match = matcher.match(path)
+              (repeat && !vals.empty?) ? break : return 
             end
-            pattern_index += 1
+            path.slice!(0, match[0].size)
+            val = match[0][prefix ? prefix.size : 0, match[0].size]
+            vals << (transformer ? transformer[val] : val)
+            var_index += 1 unless repeat
           end
-          with_path_part(env['PATH_INFO'][0, env['PATH_INFO'].size - path.size]) { blk.call *vals }
+          with_path_part(env['PATH_INFO'][0, env['PATH_INFO'].size - path.size]) { repeat ? blk.call(vals) : blk.call(*vals) }
         end
 
         def with_path_part(part)

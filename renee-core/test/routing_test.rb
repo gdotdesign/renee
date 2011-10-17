@@ -215,7 +215,7 @@ describe Renee::Core::Application::Routing do
       type = { 'Content-Type' => 'text/plain' }
       mock_app do
         path 'add' do
-          variable Integer, :repeat => true do |numbers|
+          glob Integer do |numbers|
             halt [200, type, ["Add up to #{numbers.inject(numbers.shift) {|m, i| m += i}}"]]
           end
         end
