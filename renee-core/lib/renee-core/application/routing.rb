@@ -46,9 +46,11 @@ class Renee
           end
         end
 
-        # Match parts off the path as variables. The parts matched can conform to either a regular expression, or be Numeric, or
-        # simply a String. Possible arguments to variable is a list of types to look for. Additionally, it supports a notion of a repeating
-        # variable using `:repeat => true`.
+        # Match parts off the path as variables. The parts matcher can conform to either a regular expression, or be an Integer, or
+        # simply a String.
+        # @param[Object] type the type of object to match for. If you supply Integer, this will only match integers in addition to
+        #                     casting your variable for you.
+        # @param[Object] default the default value to use if your param cannot be successfully matched.
         #
         # @example
         #   path '/' do
@@ -61,12 +63,6 @@ class Renee
         #     variable(Integer) { |id| halt [200, {}, "This is a numeric id: #{id}"] }
         #   end
         #   GET /123  #=> [200, {}, 'This is a numeric id: 123']
-        #
-        # @example
-        #   path '/' do
-        #     variable(Integer, :repeat => true) { |nums| halt [200, {}, "The sum is: #{nums.inject(nums.pop){|m,n| m += n}}!"] }
-        #   end
-        #   GET /1/2/3/4  #=> [200, {}, 'The sum is 10!']
         #
         # @example
         #   path '/test' do
