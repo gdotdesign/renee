@@ -222,9 +222,6 @@ class Renee
         end
 
         private
-        VariablePatterns = Struct.new(:pattern, :transformer)
-        INTERGER_VARIABLE_PATTERN = VariablePatterns.new(/(\d+)/, proc{|v| Integer(v)})
-
         def complex_variable(type, prefix, repeat, &blk)
           transformer = nil
           pattern = if type == Integer
