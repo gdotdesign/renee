@@ -244,27 +244,23 @@ class Renee
 
         class ChainingProxy
           def initialize(target, proxy_blk)
-            @target = target
-            @proxy_blk = proxy_blk
-            @calls = []
-            @args = []
+            @target, @proxy_blk, @calls = target, proxy_blk, []
           end
 
           def method_missing(m, *args, &blk)
-            _args, _calls, _target, _self = @args, @calls, @target, @self
-            _calls << [m, *args]
+            @calls << [m, *args]
             if blk
               @proxy_blk.call(proc { |*inner_args|
                 callback = proc { |*callback_args|
                   inner_args.concat(callback_args)
-                  if _calls.size == 0
+                  if @calls.size == 0
                     blk.call(*inner_args)
                   else
-                    call = _calls.shift
+                    call = @calls.shift
                     @target.send(call.at(0), *call.at(1), &callback)
                   end
                 }
-                call = _calls.shift
+                call = @calls.shift
                 @target.send(call.at(0), *call.at(1), &callback)
               })
             else
