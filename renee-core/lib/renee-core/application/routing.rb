@@ -273,7 +273,7 @@ class Renee
           blk ? yield(blk) : ChainingProxy.new(self, proxy)
         end
 
-        def complex_variable(type, prefix, repeat, default, count = 1, &blk)
+        def complex_variable(type, prefix, repeat, default, count = 1)
           transformer = nil
           pattern = if type == Integer
             transformer = proc{|v| Integer(v)}
@@ -296,7 +296,7 @@ class Renee
               if repeat && !vals.empty?
                 break
               else
-                blk[default] if default
+                yield default if default
                 return
               end
             end
@@ -306,7 +306,7 @@ class Renee
             var_index += 1 unless repeat
           end
           with_path_part(env['PATH_INFO'][0, env['PATH_INFO'].size - path.size]) {
-            repeat ? blk.call(vals) : blk.call(*vals)
+            repeat ? yield(vals) : yield(*vals)
           }
         end
 
@@ -324,9 +324,7 @@ class Renee
 
         def request_method(method, path = nil, &blk)
           chain(blk) do |with|
-            if env['REQUEST_METHOD'] == method
-              path ? whole_path(path) { with.call } : complete { with.call }
-            end
+            path ? whole_path(path) { with.call } : complete { with.call } if env['REQUEST_METHOD'] == method
           end
         end
       end
