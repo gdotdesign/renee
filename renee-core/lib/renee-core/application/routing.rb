@@ -250,8 +250,8 @@ class Renee
           def method_missing(m, *args, &blk)
             @calls << [m, *args]
             if blk
-              @proxy_blk.call(proc { |*inner_args|
-                callback = proc { |*callback_args|
+              @proxy_blk.call(proc do |*inner_args|
+                callback = proc do |*callback_args|
                   inner_args.concat(callback_args)
                   if @calls.size == 0
                     blk.call(*inner_args)
@@ -259,10 +259,10 @@ class Renee
                     call = @calls.shift
                     @target.send(call.at(0), *call.at(1), &callback)
                   end
-                }
+                end
                 call = @calls.shift
                 @target.send(call.at(0), *call.at(1), &callback)
-              })
+              end)
             else
               self
             end
@@ -270,11 +270,7 @@ class Renee
         end
 
         def chain(blk, &proxy)
-          if blk
-            yield blk
-          else
-            ChainingProxy.new(self, proxy)
-          end
+          blk ? yield(blk) : ChainingProxy.new(self, proxy)
         end
 
         def complex_variable(type, prefix, repeat, default, count = 1, &blk)
