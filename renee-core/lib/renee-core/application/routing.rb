@@ -311,15 +311,11 @@ class Renee
         end
 
         def with_path_part(part)
-          old_path_info = env['PATH_INFO']
-          old_script_name = env['SCRIPT_NAME']
-          old_path_info[part.size, old_path_info.size - part.size]
-          script_part, remaining_part = old_path_info[0, part.size], old_path_info[part.size, old_path_info.size]
+          old_path_info, old_script_name = env['PATH_INFO'], env['SCRIPT_NAME']
+          script_part, env['PATH_INFO'] = old_path_info[0, part.size], old_path_info[part.size, old_path_info.size]
           env['SCRIPT_NAME'] += script_part
-          env['PATH_INFO'] = remaining_part
           yield script_part
-          env['PATH_INFO'] = old_path_info
-          env['SCRIPT_NAME'] = old_script_name
+          env['PATH_INFO'], env['SCRIPT_NAME'] = old_path_info, old_script_name
         end
 
         def request_method(method, path = nil, &blk)
