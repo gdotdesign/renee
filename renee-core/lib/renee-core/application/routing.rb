@@ -46,14 +46,29 @@ class Renee
           end
         end
 
-        # Match parts off the path as variables.
+        # Match parts off the path as variables. The parts matched can conform to either a regular expression, or be Numeric, or
+        # simply a String. Possible arguments to variable is a list of types to look for. Additionally, it supports a notion of a repeating
+        # variable using `:repeat => true`.
         #
         # @example
         #   path '/' do
-        #     variable { |id| halt [200, {}, id }
+        #     variable { |id| halt [200, {}, id] }
         #   end
         #   GET /hey  #=> [200, {}, 'hey']
         #
+        # @example
+        #   path '/' do
+        #     variable(Integer) { |id| halt [200, {}, "This is a numeric id: #{id}"] }
+        #   end
+        #   GET /123  #=> [200, {}, 'This is a numeric id: 123']
+        #
+        # @example
+        #   path '/' do
+        #     variable(Integer, :repeat => true) { |nums| halt [200, {}, "The sum is: #{nums.inject(nums.pop){|m,n| m += n}}!"] }
+        #   end
+        #   GET /1/2/3/4  #=> [200, {}, 'The sum is 10!']
+        #
+        # @example
         #   path '/test' do
         #     variable { |foo, bar| halt [200, {}, "#{foo}-#{bar}"] }
         #   end
@@ -62,7 +77,7 @@ class Renee
         # @api public
         def variable(*args, &blk)
           args << {} unless args.last.is_a?(Hash)
-          args.last[:prepend] = '/'
+          args.last[:prefix] = '/'
           partial_variable(*args, &blk)
         end
         alias_method :var, :variable
@@ -72,21 +87,25 @@ class Renee
         # @api public
         def partial_variable(*args, &blk)
           opts = args.last.is_a?(Hash) ? args.pop : nil
-          type = args.first || opts && opts[:type]
-          prepend = opts && opts[:prepend] || ''
-          if type == Integer
-            complex_variable(/#{Regexp.quote(prepend)}(\d+)/, proc{|v| Integer(v)}, &blk)
-          else case type
-            when nil
-              detected_extension ?
-                complex_variable(/#{Regexp.quote(prepend)}((?:[^\/](?!#{Regexp.quote(detected_extension)}$))+)(?=$|\/|\.#{Regexp.quote(detected_extension)})/, &blk) :
-                complex_variable(/#{Regexp.quote(prepend)}([^\/]+)(?=$|\/)/, &blk)
-            when Regexp
-              complex_variable(/#{Regexp.quote(prepend)}(#{type.to_s})/, &blk)
+          prefix = opts && opts[:prefix] || ''
+          repeat = opts && opts.key?(:repeat) ? opts[:repeat] : false
+          blk.arity.times {|i| args[i] ||= args.last}
+          args << nil if args.empty?
+          patterns = args.map do |type|
+            if type == Integer
+              INTERGER_VARIABLE_PATTERN
+            elsif type == nil or type == String
+              VariablePatterns.new(detected_extension ?
+                /((?:[^\/](?!#{Regexp.quote(detected_extension)}$))+)(?=$|\/|\.#{Regexp.quote(detected_extension)})/ :
+                /([^\/]+)(?=$|\/)/
+              )
+            elsif type.is_a?(Regexp)
+              VariablePatterns.new(/(#{type.to_s})/)
             else
               raise "Unexpected variable type #{type.inspect}"
             end
           end
+          complex_variable(patterns, prefix, repeat, &blk)
         end
         alias_method :part_var, :partial_variable
 
@@ -219,12 +238,30 @@ class Renee
         end
 
         private
-        def complex_variable(matcher, transformer = nil, &blk)
-          warn "variable currently isn't taking any parameters" unless blk.arity > 0
-          if var_value = /^#{(matcher.to_s) * blk.arity}/.match(env['PATH_INFO'])
-            vars = var_value.to_a
-            with_path_part(vars.shift) { blk.call *vars.map{|v| transformer ? transformer[v[0, v.size]] : v[0, v.size]} }
+        VariablePatterns = Struct.new(:pattern, :transformer)
+        INTERGER_VARIABLE_PATTERN = VariablePatterns.new(/(\d+)/, proc{|v| Integer(v)})
+
+        def complex_variable(patterns, prefix, repeat, &blk)
+          pattern_index = 0
+          path = env['PATH_INFO'].dup
+          vals = []
+          until pattern_index == patterns.size
+            matcher = /^#{Regexp.quote(prefix)}#{patterns[pattern_index].pattern.to_s}/
+            return unless match = matcher.match(path)
+            path.slice!(0, match[0].size)
+            val = match[0][prefix.size, match[0].size]
+            vals << (patterns.last.transformer ? patterns.last.transformer[val] : val)
+            if pattern_index == patterns.size - 1 and repeat
+              vals << [vals.pop]
+              while match = matcher.match(path)
+                path.slice!(0, match[0].size)
+                val = match[0][prefix.size, match[0].size]
+                vals.last << (patterns.last.transformer ? patterns.last.transformer[val] : val)
+              end
+            end
+            pattern_index += 1
           end
+          with_path_part(env['PATH_INFO'][0, env['PATH_INFO'].size - path.size]) { blk.call *vals }
         end
 
         def with_path_part(part)

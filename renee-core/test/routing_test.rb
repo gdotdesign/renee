@@ -200,7 +200,7 @@ describe Renee::Core::Application::Routing do
       type = { 'Content-Type' => 'text/plain' }
       mock_app do
         path 'add' do
-          variable :type => Integer do |a, b|
+          variable Integer do |a, b|
             halt [200, type, ["#{a + b}"]]
           end
         end
@@ -209,6 +209,24 @@ describe Renee::Core::Application::Routing do
       get '/add/3/4'
       assert_equal 200, response.status
       assert_equal '7', response.body
+    end
+
+    it "accepts allows repeating vars" do
+      type = { 'Content-Type' => 'text/plain' }
+      mock_app do
+        path 'add' do
+          variable Integer, :repeat => true do |numbers|
+            halt [200, type, ["Add up to #{numbers.inject(numbers.shift) {|m, i| m += i}}"]]
+          end
+        end
+      end
+
+      get '/add/3/4'
+      assert_equal 200, response.status
+      assert_equal 'Add up to 7', response.body
+      get '/add/3/4/6/7'
+      assert_equal 200, response.status
+      assert_equal 'Add up to 20', response.body
     end
 
     it "accepts a regexp" do
