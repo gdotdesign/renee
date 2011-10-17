@@ -229,6 +229,22 @@ describe Renee::Core::Application::Routing do
       assert_equal 'Add up to 20', response.body
     end
 
+    it "allows default var values" do
+      mock_app do
+        path "blog" do
+          var Integer, 1 do |page|
+            halt "page is #{page}"
+          end
+        end
+      end
+      get '/blog'
+      assert_equal 200, response.status
+      assert_equal 'page is 1', response.body
+      get '/blog/5'
+      assert_equal 200, response.status
+      assert_equal 'page is 5', response.body
+    end
+
     it "accepts a regexp" do
       type = { 'Content-Type' => 'text/plain' }
       mock_app do

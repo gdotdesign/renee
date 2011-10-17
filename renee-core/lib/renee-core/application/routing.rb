@@ -75,21 +75,21 @@ class Renee
         #   GET /test/hey/there  #=> [200, {}, 'hey-there']
         #
         # @api public
-        def variable(type = nil, &blk)
-          complex_variable(type, '/', false, &blk)
+        def variable(type = nil, default = nil, &blk)
+          complex_variable(type, '/', false, default, &blk)
         end
         alias_method :var, :variable
 
         def repeating_variable(type = nil, &blk)
-          complex_variable(type, '/', true, &blk)
+          complex_variable(type, '/', true, nil, &blk)
         end
         alias_method :glob, :repeating_variable
 
         # Match parts off the path as variables without a leading slash.
         # @see #variable
         # @api public
-        def partial_variable(type = nil, repeat = false, &blk)
-          complex_variable(type, nil, repeat, &blk)
+        def partial_variable(type = nil, default = nil, &blk)
+          complex_variable(type, nil, false, default, &blk)
         end
         alias_method :part_var, :partial_variable
 
@@ -222,7 +222,7 @@ class Renee
         end
 
         private
-        def complex_variable(type, prefix, repeat, &blk)
+        def complex_variable(type, prefix, repeat, default, &blk)
           transformer = nil
           pattern = if type == Integer
             transformer = proc{|v| Integer(v)}
@@ -242,7 +242,12 @@ class Renee
           matcher = /^#{prefix && Regexp.quote(prefix)}#{pattern.to_s}/
           until var_index == blk.arity
             unless match = matcher.match(path)
-              (repeat && !vals.empty?) ? break : return 
+              if repeat && !vals.empty?
+                break
+              else
+                blk[default] if default
+                return
+              end
             end
             path.slice!(0, match[0].size)
             val = match[0][prefix ? prefix.size : 0, match[0].size]
