@@ -68,7 +68,7 @@ class Renee
         #
         # @example
         #   path '/' do
-        #     variable(Integer) { |id| halt [200, {}, "This is a numeric id: #{id}"] }
+        #     variable(:integer) { |id| halt [200, {}, "This is a numeric id: #{id}"] }
         #   end
         #   GET /123  #=> [200, {}, 'This is a numeric id: 123']
         #
@@ -99,7 +99,7 @@ class Renee
         # @see #variable
         # @api public
         def partial_variable(type = nil, default = nil, &blk)
-          chain(blk) {|with| complex_variable(type, nil, false, default, &with) }
+          chain(blk) {|with| complex_variable(type, '', false, default, &with) }
         end
         alias_method :part_var, :partial_variable
 
@@ -242,24 +242,28 @@ class Renee
         private
         def complex_variable(type, prefix, repeat, default, count = 1)
           transformer = nil
-          pattern = if type == Integer
-            transformer = proc{|v| Integer(v)}
-            /\d+/
-          elsif type == nil or type == String
-            detected_extension ?
-              /(([^\/](?!#{Regexp.quote(detected_extension)}$))+)(?=$|\/|\.#{Regexp.quote(detected_extension)})/ :
-              /([^\/]+)(?=$|\/)/
-          elsif type.is_a?(Regexp)
-            type
+          matcher = settings.variable_types[type]
+          matcher ||= case type
+          when nil, String
+            r = detected_extension ?
+              /^#{prefix && Regexp.quote(prefix)}(([^\/](?!#{Regexp.quote(detected_extension)}$))+)(?=$|\/|\.#{Regexp.quote(detected_extension)})/ :
+              /^#{prefix && Regexp.quote(prefix)}([^\/]+)(?=$|\/)/
+          when Regexp
+            r = /^#{prefix && Regexp.quote(prefix)}#{type.to_s}/
           else
             raise "Unexpected variable type #{type.inspect}"
           end
+          if matcher.is_a?(Regexp)
+            m, pf = matcher, prefix
+            matcher = proc {|p, pf| m = r.match(p); m && [m[0], m[0][pf ? pf.size : 0, m[0].size]]}
+          end
+
           path = env['PATH_INFO'].dup
           vals = []
           var_index = 0
-          matcher = /^#{prefix && Regexp.quote(prefix)}#{pattern.to_s}/
-          until var_index == count
-            unless match = matcher.match(path)
+          until count === var_index
+            match = matcher[path, prefix]
+            unless match
               if repeat && !vals.empty?
                 break
               else
@@ -267,9 +271,9 @@ class Renee
                 return
               end
             end
-            path.slice!(0, match[0].size)
-            val = match[0][prefix ? prefix.size : 0, match[0].size]
-            vals << (transformer ? transformer[val] : val)
+            path.slice!(0, match.first.size)
+            val = match.first[prefix ? prefix.size : 0, match.first.size]
+            vals << match.last
             var_index += 1 unless repeat
           end
           with_path_part(env['PATH_INFO'][0, env['PATH_INFO'].size - path.size]) {

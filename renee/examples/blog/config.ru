@@ -10,7 +10,7 @@ run Renee {
   @blog = blog
 
   # find blog post and do things to it.
-  var Integer do |id|
+  var :integer do |id|
     @post = @blog.find_post(id)
     halt 404 unless @post
     path('edit') { render! 'edit' }

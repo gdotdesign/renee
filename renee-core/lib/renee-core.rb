@@ -1,5 +1,6 @@
 require 'rack'
 require 'renee-core/version'
+require 'renee-core/matcher'
 require 'renee-core/settings'
 require 'renee-core/response'
 require 'renee-core/application'

@@ -200,7 +200,7 @@ describe Renee::Core::Application::Routing do
       type = { 'Content-Type' => 'text/plain' }
       mock_app do
         path 'add' do
-          var(Integer).var(Integer) do |a, b|
+          var(:integer).var(:integer) do |a, b|
             halt [200, type, ["#{a + b}"]]
           end
         end
@@ -215,7 +215,7 @@ describe Renee::Core::Application::Routing do
       type = { 'Content-Type' => 'text/plain' }
       mock_app do
         path 'add' do
-          glob Integer do |numbers|
+          glob :integer do |numbers|
             halt [200, type, ["Add up to #{numbers.inject(numbers.shift) {|m, i| m += i}}"]]
           end
         end
@@ -232,7 +232,7 @@ describe Renee::Core::Application::Routing do
     it "allows default var values" do
       mock_app do
         path "blog" do
-          var Integer, 1 do |page|
+          var :integer, 1 do |page|
             halt "page is #{page}"
           end
         end
@@ -378,7 +378,7 @@ describe Renee::Core::Application::Routing do
       mock_app do
         part '/test' do
           part 'more' do
-            part_var Integer do |var|
+            part_var :integer do |var|
               path 'test' do
                 halt var.to_s
               end
@@ -448,7 +448,7 @@ describe Renee::Core::Application::Routing do
     it "should match parts and partial vars" do
       mock_app do
         part('test') {
-          part_var(Integer) { |id|
+          part_var(:integer) { |id|
             part('more') {
               halt "the id is #{id}"
             }

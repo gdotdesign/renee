@@ -112,7 +112,7 @@ run Renee::Core.new {
       get { render! "new" }
     end
 
-    var Integer  do |id|
+    var :integer do |id|
       @post = Post.find(id)
 
       # GET /posts/5

@@ -8,9 +8,10 @@ class Renee
     #  Renee::Core.new { ... }.setup { views_path "./views" }
     #
     class Settings
-      attr_reader :includes
+      attr_reader :includes, :variable_types
       def initialize
         @includes = []
+        @variable_types = {:integer => IntegerMatcher}
       end
 
       # Get or sets the views_path for an application.
@@ -28,6 +29,11 @@ class Renee
 
       def include(mod)
         includes << mod
+      end
+
+      def register_variable_type(name, matcher, &blk)
+        on_error = Proc { halt :bad_request }
+        @variable_types[name] = Matcher.new(matcher, blk, on_error)
       end
     end
   end
