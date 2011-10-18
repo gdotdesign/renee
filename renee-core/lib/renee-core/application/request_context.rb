@@ -14,7 +14,14 @@ class Renee
           @detected_extension = env['PATH_INFO'][/\.([^\.\/]+)$/, 1]
           @is_index_request = env['PATH_INFO'][/^\/?$/]
           # TODO clear template cache in development? `template_cache.clear`
-          interpret_response catch(:halt) { instance_eval(&application_block); Renee::Core::Response.new("Not found", 404).finish }
+          catch(:halt) do
+            begin
+              instance_eval(&application_block)
+            rescue ClientError => e
+              e.response ? instance_eval(&e.response) : halt("There was an error with your request", 400)
+            end
+            Renee::Core::Response.new("Not found", 404).finish
+          end
         end # call
       end
     end

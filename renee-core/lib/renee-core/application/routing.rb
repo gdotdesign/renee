@@ -99,7 +99,7 @@ class Renee
         # @see #variable
         # @api public
         def partial_variable(type = nil, &blk)
-          chain(blk) {|with| complex_variable(type, '', 1, &with) }
+          chain(blk) {|with| complex_variable(type, nil, 1, &with) }
         end
         alias_method :part_var, :partial_variable
 
@@ -246,13 +246,7 @@ class Renee
           vals = []
           var_index = 0
           variable_matching_loop(count) do
-            if prefix
-              if path.start_with?(prefix)
-                path.slice!(0, prefix.size)
-              else
-                break
-              end
-            end
+            path.start_with?(prefix) ? path.slice!(0, prefix.size) : break if prefix
             if match = matcher[path]
               path.slice!(0, match.first.size)
               vals << match.last
@@ -292,7 +286,7 @@ class Renee
             end
             proc do |path|
               if match = /^#{regexp.to_s}/.match(path)
-                [match[0], match[0][prefix ? prefix.size : 0, match[0].size]]
+                [match[0]]
               end
             end
           end

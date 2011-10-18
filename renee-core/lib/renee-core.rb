@@ -5,6 +5,7 @@ require 'renee-core/settings'
 require 'renee-core/response'
 require 'renee-core/application'
 require 'renee-core/url_generation'
+require 'renee-core/exceptions'
 
 # Renee top-level constant
 class Renee

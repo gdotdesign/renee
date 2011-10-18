@@ -11,7 +11,8 @@ class Renee
       attr_reader :includes, :variable_types
       def initialize
         @includes = []
-        @variable_types = {:integer => IntegerMatcher}
+        @variable_types = {}
+        register_variable_type :integer, IntegerMatcher
       end
 
       # Get or sets the views_path for an application.
@@ -31,9 +32,10 @@ class Renee
         includes << mod
       end
 
-      def register_variable_type(name, matcher, &blk)
-        on_error = Proc { halt :bad_request }
-        @variable_types[name] = Matcher.new(matcher, blk, on_error)
+      def register_variable_type(name, matcher)
+        matcher = Matcher.new(matcher) unless matcher.is_a?(Matcher)
+        matcher.name = name
+        @variable_types[name] = matcher
       end
     end
   end
