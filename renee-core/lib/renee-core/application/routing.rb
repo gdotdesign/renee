@@ -79,27 +79,27 @@ class Renee
         #   GET /test/hey/there  #=> [200, {}, 'hey-there']
         #
         # @api public
-        def variable(type = nil, default = nil, &blk)
-          chain(blk) { |with| complex_variable(type, '/', false, default, &with) }
+        def variable(type = nil, &blk)
+          chain(blk) { |with| complex_variable(type, '/', 1, &with) }
         end
         alias_method :var, :variable
 
         def multi_variable(count, type = nil, &blk)
-          chain(blk) { |with| complex_variable(type, '/', false, nil, count, &with) }
+          chain(blk) { |with| complex_variable(type, '/', count, &with) }
         end
         alias_method :multi_var, :multi_variable
         alias_method :mvar, :multi_variable
 
         def repeating_variable(type = nil, &blk)
-          chain(blk) { |with| complex_variable(type, '/', true, nil, &with) }
+          chain(blk) { |with| complex_variable(type, '/', nil, &with) }
         end
         alias_method :glob, :repeating_variable
 
         # Match parts off the path as variables without a leading slash.
         # @see #variable
         # @api public
-        def partial_variable(type = nil, default = nil, &blk)
-          chain(blk) {|with| complex_variable(type, '', false, default, &with) }
+        def partial_variable(type = nil, &blk)
+          chain(blk) {|with| complex_variable(type, '', 1, &with) }
         end
         alias_method :part_var, :partial_variable
 
@@ -240,45 +240,55 @@ class Renee
         end
 
         private
-        def complex_variable(type, prefix, repeat, default, count = 1)
-          transformer = nil
-          matcher = settings.variable_types[type]
-          matcher ||= case type
-          when nil, String
-            r = detected_extension ?
-              /^#{prefix && Regexp.quote(prefix)}(([^\/](?!#{Regexp.quote(detected_extension)}$))+)(?=$|\/|\.#{Regexp.quote(detected_extension)})/ :
-              /^#{prefix && Regexp.quote(prefix)}([^\/]+)(?=$|\/)/
-          when Regexp
-            r = /^#{prefix && Regexp.quote(prefix)}#{type.to_s}/
-          else
-            raise "Unexpected variable type #{type.inspect}"
-          end
-          if matcher.is_a?(Regexp)
-            m, pf = matcher, prefix
-            matcher = proc {|p, pf| m = r.match(p); m && [m[0], m[0][pf ? pf.size : 0, m[0].size]]}
-          end
-
+        def complex_variable(type, prefix, count)
+          matcher = variable_matcher_for_type(type)
           path = env['PATH_INFO'].dup
           vals = []
           var_index = 0
-          until count === var_index
-            match = matcher[path, prefix]
-            unless match
-              if repeat && !vals.empty?
-                break
-              else
-                yield default if default
-                return
+          variable_matching_loop(count) do
+            if match = matcher[path, prefix]
+              path.slice!(0, match.first.size)
+              vals << match.last
+            end
+          end
+          return unless count.nil? || count === vals.size
+          with_path_part(env['PATH_INFO'][0, env['PATH_INFO'].size - path.size]) do
+            if count == 1
+              yield(vals.first)
+            else
+              yield(vals)
+            end
+          end
+        end
+
+        def variable_matching_loop(count)
+          case count
+          when Range then count.max.times { break unless yield }
+          when nil   then loop { break unless yield }
+          else            count.times { break unless yield }
+          end
+        end
+
+        def variable_matcher_for_type(type)
+          if settings.variable_types.key?(type)
+            settings.variable_types[type]
+          else
+            regexp = case type
+            when nil, String
+              detected_extension ?
+                /(([^\/](?!#{Regexp.quote(detected_extension)}$))+)(?=$|\/|\.#{Regexp.quote(detected_extension)})/ :
+                /([^\/]+)(?=$|\/)/
+            when Regexp
+              type
+            else
+              raise "Unexpected variable type #{type.inspect}"
+            end
+            proc do |path, prefix|
+              if match = /^#{Regexp.quote(prefix)}#{regexp.to_s}/.match(path)
+                [match[0], match[0][prefix ? prefix.size : 0, match[0].size]]
               end
             end
-            path.slice!(0, match.first.size)
-            val = match.first[prefix ? prefix.size : 0, match.first.size]
-            vals << match.last
-            var_index += 1 unless repeat
           end
-          with_path_part(env['PATH_INFO'][0, env['PATH_INFO'].size - path.size]) {
-            repeat ? yield(vals) : yield(*vals)
-          }
         end
 
         def with_path_part(part)

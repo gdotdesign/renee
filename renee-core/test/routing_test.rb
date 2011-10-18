@@ -211,6 +211,26 @@ describe Renee::Core::Application::Routing do
       assert_equal '7', response.body
     end
 
+    it "allows arbitrary ranges of values" do
+      type = { 'Content-Type' => 'text/plain' }
+      mock_app do
+        path 'add' do
+          multi_var(2..5, :integer).get do |numbers|
+            halt [200, type, ["Add up to #{numbers.inject(numbers.shift) {|m, i| m += i}}"]]
+          end
+        end
+      end
+
+      get '/add/3/4'
+      assert_equal 200, response.status
+      assert_equal 'Add up to 7', response.body
+      get '/add/3/4/6/7'
+      assert_equal 200, response.status
+      assert_equal 'Add up to 20', response.body
+      get '/add/3/4/6/7/8/10/2'
+      assert_equal 404, response.status
+    end
+
     it "accepts allows repeating vars" do
       type = { 'Content-Type' => 'text/plain' }
       mock_app do
@@ -227,22 +247,6 @@ describe Renee::Core::Application::Routing do
       get '/add/3/4/6/7'
       assert_equal 200, response.status
       assert_equal 'Add up to 20', response.body
-    end
-
-    it "allows default var values" do
-      mock_app do
-        path "blog" do
-          var :integer, 1 do |page|
-            halt "page is #{page}"
-          end
-        end
-      end
-      get '/blog'
-      assert_equal 200, response.status
-      assert_equal 'page is 1', response.body
-      get '/blog/5'
-      assert_equal 200, response.status
-      assert_equal 'page is 5', response.body
     end
 
     it "accepts a regexp" do
