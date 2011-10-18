@@ -27,18 +27,20 @@ class Renee
       end
 
       def [](val)
-        matcher = case @matcher
+        match = nil
+        case @matcher
         when Array
-          @matcher.find { |match| match.matcher[val] }
+          match = nil
+          @matcher.find { |m| match = m[val] }
         else
           if match = /^#{@matcher.to_s}/.match(val)
-            m = [match[0]]
-            m << @transform_handler.call(match[0]) if @transform_handler
-            m
+            match = [match[0]]
+            match << @transform_handler.call(match.first) if @transform_handler
+            match
           end
         end
-        if matcher
-          matcher
+        if match
+          match
         elsif @error_handler
           raise ClientError.new("There was an error interpreting the value #{val.inspect} for #{name.inspect}", @error_handler)
         end

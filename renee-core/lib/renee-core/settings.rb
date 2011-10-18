@@ -33,7 +33,11 @@ class Renee
       end
 
       def register_variable_type(name, matcher)
-        matcher = Matcher.new(matcher) unless matcher.is_a?(Matcher)
+        matcher = case matcher
+        when Matcher then matcher
+        when Array   then Matcher.new(matcher.map{|m| @variable_types[m]})
+        else              Matcher.new(matcher)
+        end
         matcher.name = name
         @variable_types[name] = matcher
       end
