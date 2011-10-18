@@ -201,11 +201,10 @@ class Renee
         # @param [Array, Hash] q
         #   Either an array or hash of things to match query string variables. If given
         #   an array, if you pass the values for each key as parameters to the block given.
-        #   If given a hash, then every value must be able to #=== match each value in the query
-        #   parameters for each key in the hash.
+        #   If given a hash, then every value must be able to be matched by a registered type.
         #
         # @example
-        #   query(:key => 'value') { halt [200, {}, "hello world"] }
+        #   query(:key => :integer) { |h| halt [200, {}, "hello world #{h[:key]}"] }
         #
         # @example
         #   query(:key) { |val| halt [200, {}, "key is #{val}"] }
@@ -214,7 +213,7 @@ class Renee
         def query(q, &blk)
           chain(blk) do |with|
             case q
-            when Hash  then q.any? {|k,v| !(v === request[k.to_s]) } ? return : with.call
+            when Hash  then with.call(Hash[q.map{|(k, v)| [k, transform(v, request[k.to_s]) || return]}])
             when Array then with.call(*q.map{|qk| request[qk.to_s] or return })
             else            query([q], &blk)
             end

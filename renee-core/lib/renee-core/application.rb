@@ -3,6 +3,7 @@ require "renee-core/application/routing"
 require "renee-core/application/responding"
 require "renee-core/application/rack_interaction"
 require "renee-core/application/chaining"
+require "renee-core/application/transform"
 
 class Renee
   class Core
@@ -17,6 +18,7 @@ class Renee
       include Responding
       include RackInteraction
       include Chaining
+      include Transform
 
       attr_reader :application_block, :settings
 

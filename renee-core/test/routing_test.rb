@@ -70,15 +70,16 @@ describe Renee::Core::Application::Routing do
     it "accepts a set of query params (as hash)" do
       mock_app do
         path 'test' do
-          query :foo => "bar" do
-            halt 200
+          query :foo => :integer do |h|
+            halt "foo is #{h[:foo].inspect}"
           end
         end
       end
 
-      get '/test?foo=bar'
+      get '/test?foo=123'
       assert_equal 200, response.status
-      get '/test?foo=bar2'
+      assert_equal 'foo is 123', response.body
+      get '/test?foo=bar'
       assert_equal 404, response.status
     end
 
