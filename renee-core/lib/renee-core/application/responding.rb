@@ -28,7 +28,7 @@ class Renee
         # @param [Object...] response The response to use.
         # @see #interpret_response
         def halt(*response)
-          throw :halt, interpret_response(response.size == 1 ? response.first : response)
+          throw :halt, response.size == 1 ? response.first : response
         end
 
         ##
