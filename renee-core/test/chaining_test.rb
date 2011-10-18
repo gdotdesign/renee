@@ -20,4 +20,14 @@ describe "Route chaining" do
     assert_equal 200,   response.status
     assert_equal 'asd', response.body
   end
+
+  it "should chain and halt with a non-routing method" do
+    type = { 'Content-Type' => 'text/plain' }
+    mock_app do
+      path('/').get.halt "hi"
+    end
+    get '/'
+    assert_equal 200,   response.status
+    assert_equal 'hi', response.body
+  end
 end

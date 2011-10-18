@@ -9,11 +9,11 @@ class Renee
         #     get { halt build { use Rack::ContentLength; run proc { |env| Rack::Response.new("Hello!").finish } } }
         #
         def build(&blk)
-          chain(blk) { |with| run Rack::Builder.new(&with).to_app }
+          run Rack::Builder.new(&blk).to_app
         end
 
         def build!(&blk)
-          chain(blk) { |with| run! build(&with) }
+          run! build(&blk)
         end
 
         # Runs a rack application

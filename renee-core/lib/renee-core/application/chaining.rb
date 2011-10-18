@@ -11,13 +11,13 @@ class Renee
 
           def method_missing(m, *args, &blk)
             @calls << [m, *args]
-            if blk
+            if blk || !Routing.public_method_defined?(m)
               ret = nil
               @proxy_blk.call(proc do |*inner_args|
                 callback = proc do |*callback_args|
                   inner_args.concat(callback_args)
                   if @calls.size == 0
-                    blk.call(*inner_args)
+                    return blk.call(*inner_args) if blk
                   else
                     call = @calls.shift
                     ret = @target.send(call.at(0), *call.at(1), &callback)
