@@ -246,7 +246,14 @@ class Renee
           vals = []
           var_index = 0
           variable_matching_loop(count) do
-            if match = matcher[path, prefix]
+            if prefix
+              if path.start_with?(prefix)
+                path.slice!(0, prefix.size)
+              else
+                break
+              end
+            end
+            if match = matcher[path]
               path.slice!(0, match.first.size)
               vals << match.last
             end
@@ -283,8 +290,8 @@ class Renee
             else
               raise "Unexpected variable type #{type.inspect}"
             end
-            proc do |path, prefix|
-              if match = /^#{Regexp.quote(prefix)}#{regexp.to_s}/.match(path)
+            proc do |path|
+              if match = /^#{regexp.to_s}/.match(path)
                 [match[0], match[0][prefix ? prefix.size : 0, match[0].size]]
               end
             end

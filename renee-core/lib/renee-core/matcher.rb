@@ -5,20 +5,16 @@ class Renee
         @matcher, @transformer, @error_handler = matcher, transformer, error_handler
       end
 
-      def [](path, prefix)
+      def [](val)
         matcher = case @matcher
         when Array
-          @matcher.find { |match| match[path, prefix] }
+          @matcher.find { |match| match.matcher[path] }
         else
-          if match = /^#{Regexp.quote(prefix)}#{@matcher.to_s}/.match(path)
-            [match[0], @transformer[match[0][prefix.size, match[0].size]]]
+          if match = @matcher.match(path)
+            [match[0], @transformer[match[0]]]
           end
         end
-        if matcher.nil? && @error_handler
-          throw :halt, error_handler
-        else
-          matcher
-        end
+        throw :halt, error_handler if @error_handler
       end
     end
     IntegerMatcher = Matcher.new(/\d+/, proc{|v| Integer(v)})
