@@ -9,11 +9,11 @@ class Renee
         #     get { halt build { use Rack::ContentLength; run proc { |env| Rack::Response.new("Hello!").finish } } }
         #
         def build(&blk)
-          run Rack::Builder.new(&blk).to_app
+          chain(blk) { |with| run Rack::Builder.new(&with).to_app }
         end
 
         def build!(&blk)
-          run! build(&blk)
+          chain(blk) { |with| run! build(&with) }
         end
 
         # Runs a rack application
@@ -21,6 +21,7 @@ class Renee
         #     get { halt run proc { |env| Renee::Core::Response.new("Hello!").finish } }
         #
         def run(app = nil, &blk)
+          raise "You cannot supply both a block and an app" unless app.nil? ^ blk.nil?
           (app || blk).call(env)
         end
 
@@ -31,7 +32,7 @@ class Renee
         #     get { run proc { |env| Renee::Core::Response.new("Hello!").finish } }
         #
         def run!(*args)
-          halt! run(*args)
+          halt run(*args)
         end
       end
     end

@@ -1,7 +1,8 @@
-require File.expand_path(File.dirname(__FILE__) + "/application/request_context")
-require File.expand_path(File.dirname(__FILE__) + "/application/routing")
-require File.expand_path(File.dirname(__FILE__) + "/application/responding")
-require File.expand_path(File.dirname(__FILE__) + "/application/rack_interaction")
+require "renee-core/application/request_context"
+require "renee-core/application/routing"
+require "renee-core/application/responding"
+require "renee-core/application/rack_interaction"
+require "renee-core/application/chaining"
 
 class Renee
   class Core
@@ -15,6 +16,7 @@ class Renee
       include Routing
       include Responding
       include RackInteraction
+      include Chaining
 
       attr_reader :application_block, :settings
 

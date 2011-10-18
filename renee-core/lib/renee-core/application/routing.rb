@@ -240,37 +240,6 @@ class Renee
         end
 
         private
-        class ChainingProxy
-          def initialize(target, proxy_blk)
-            @target, @proxy_blk, @calls = target, proxy_blk, []
-          end
-
-          def method_missing(m, *args, &blk)
-            @calls << [m, *args]
-            if blk
-              @proxy_blk.call(proc do |*inner_args|
-                callback = proc do |*callback_args|
-                  inner_args.concat(callback_args)
-                  if @calls.size == 0
-                    blk.call(*inner_args)
-                  else
-                    call = @calls.shift
-                    @target.send(call.at(0), *call.at(1), &callback)
-                  end
-                end
-                call = @calls.shift
-                @target.send(call.at(0), *call.at(1), &callback)
-              end)
-            else
-              self
-            end
-          end
-        end
-
-        def chain(blk, &proxy)
-          blk ? yield(blk) : ChainingProxy.new(self, proxy)
-        end
-
         def complex_variable(type, prefix, repeat, default, count = 1)
           transformer = nil
           pattern = if type == Integer

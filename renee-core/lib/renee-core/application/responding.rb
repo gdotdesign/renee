@@ -6,7 +6,7 @@ class Renee
 
         # Codes used by Symbol lookup in interpret_response.
         # @example
-        #   halt! :unauthorized # would return a 401.
+        #   halt :unauthorized # would return a 401.
         #
         HTTP_CODES = {
           :ok => 200,
@@ -24,20 +24,10 @@ class Renee
           :error => 500,
           :not_implemented => 501}.freeze
 
-        # Halts current processing to the top-level calling Renee application and uses that as a response. This method requies that
-        # the PATH_INFO be completely consumed.
+        # Halts current processing to the top-level calling Renee application and uses that as a response.
         # @param [Object...] response The response to use.
         # @see #interpret_response
         def halt(*response)
-          raise "PATH_INFO hasn't been entirely consumed, you still have #{env['PATH_INFO'].inspect} left. Try putting a #remainder block around it, or, if you don't care about entirely consuming your path_info, use #halt!" unless env['PATH_INFO'] == ''
-          halt! *response
-        end
-
-        # Halts current processing to the top-level calling Renee application and uses that as a response. Unlike #halt, this does
-        # not require the path to be consumed.
-        # @param [Object...] response The response to use.
-        # @see #interpret_response
-        def halt!(*response)
           throw :halt, interpret_response(response.size == 1 ? response.first : response)
         end
 
