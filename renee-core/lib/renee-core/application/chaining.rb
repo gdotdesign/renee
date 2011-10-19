@@ -11,7 +11,9 @@ class Renee
 
           def method_missing(m, *args, &blk)
             @calls << [m, *args]
-            if blk || !Routing.public_method_defined?(m)
+            if blk.nil? && @target.class.private_method_defined?(:"#{m}_without_chain")
+              self
+            else
               ret = nil
               @proxy_blk.call(proc do |*inner_args|
                 callback = proc do |*callback_args|
@@ -27,14 +29,30 @@ class Renee
                 ret = @target.send(call.at(0), *call.at(1), &callback)
               end)
               ret
-            else
-              self
+            end
+          end
+        end
+
+        module ClassMethods
+          def chain_method(*methods)
+            methods.each do |m|
+              class_eval <<-EOT, __FILE__, __LINE__ + 1
+                alias_method :#{m}_without_chain, :#{m}
+                def #{m}(*args, &blk)
+                  chain(blk) { |subblk| #{m}_without_chain(*args, &subblk) }
+                end
+                private :#{m}_without_chain
+              EOT
             end
           end
         end
 
         def chain(blk, &proxy)
           blk ? yield(blk) : ChainingProxy.new(self, proxy)
+        end
+
+        def self.included(o)
+          o.extend(ClassMethods)
         end
       end
     end

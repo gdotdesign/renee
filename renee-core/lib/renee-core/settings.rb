@@ -13,6 +13,7 @@ class Renee
         @includes = []
         @variable_types = {}
         register_variable_type :integer, IntegerMatcher
+        register_variable_type :int, :integer
       end
 
       # Get or sets the views_path for an application.
@@ -36,6 +37,7 @@ class Renee
         matcher = case matcher
         when Matcher then matcher
         when Array   then Matcher.new(matcher.map{|m| @variable_types[m]})
+        when Symbol  then @variable_types[matcher]
         else              Matcher.new(matcher)
         end
         matcher.name = name

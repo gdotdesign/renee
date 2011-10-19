@@ -19,7 +19,7 @@ describe Renee::Core::Matcher do
         halt i.inspect
       end
     }.setup {
-      register_variable_type(:symbol, /[a-z_]+/).on_transform{|v| v.to_sym}.halt_on_error!
+      register_variable_type(:symbol, /[a-z_]+/).on_transform{|v| v.to_sym}.raise_on_error!
     }
     get '/123'
     assert_equal 400, response.status

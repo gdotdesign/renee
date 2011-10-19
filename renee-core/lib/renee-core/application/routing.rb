@@ -3,6 +3,8 @@ class Renee
     class Application
       # Collection of useful methods for routing within a {Renee::Core} app.
       module Routing
+        include Chaining
+
         # Match a path to respond to.
         #
         # @param [String] p
@@ -20,39 +22,35 @@ class Renee
         #
         # @api public
         def path(p, &blk)
-          chain(blk) do |with|
-            p = p[1, p.size] if p[0] == ?/
-            extension_part = detected_extension ? "|\\.#{Regexp.quote(detected_extension)}" : ""
-            part(/^\/#{Regexp.quote(p)}(\/?|$)(?=\/|$#{extension_part})/, &with)
-          end
+          p = p[1, p.size] if p[0] == ?/
+          extension_part = detected_extension ? "|\\.#{Regexp.quote(detected_extension)}" : ""
+          part(/^\/#{Regexp.quote(p)}(\/?|$)(?=\/|$#{extension_part})/, &blk)
         end
+        chain_method :path
 
         # Like #path, but requires the entire path to be consumed.
         # @see #path
         def whole_path(p, &blk)
-          chain(blk) do |with|
-            path(p) { complete(&with) }
-          end
+          path(p) { complete(&blk) }
         end
+        chain_method :whole_path
 
         # Like #path, but doesn't automatically match trailing-slashes.
         # @see #path
         def exact_path(p, &blk)
-          chain(blk) do |with|
-            p = p[1, part.size] if p[0] == ?/
-            part(/^\/#{Regexp.quote(p)}/, &with)
-          end
+          p = p[1, part.size] if p[0] == ?/
+          part(/^\/#{Regexp.quote(p)}/, &blk)
         end
+        chain_method :exact_path
 
         # Like #path, doesn't look for leading slashes.
         def part(p, &blk)
-          chain(blk) do |with|
-            p = /\/?#{Regexp.quote(p)}/ if p.is_a?(String)
-            if match = env['PATH_INFO'][p]
-              with_path_part(match) { with.call }
-            end
+          p = /\/?#{Regexp.quote(p)}/ if p.is_a?(String)
+          if match = env['PATH_INFO'][p]
+            with_path_part(match) { blk.call }
           end
         end
+        chain_method :part
 
         # Match parts off the path as variables. The parts matcher can conform to either a regular expression, or be an Integer, or
         # simply a String.
@@ -80,28 +78,32 @@ class Renee
         #
         # @api public
         def variable(type = nil, &blk)
-          chain(blk) { |with| complex_variable(type, '/', 1, &with) }
+          complex_variable(type, '/', 1, &blk)
         end
         alias_method :var, :variable
+        chain_method :variable, :var
 
         def multi_variable(count, type = nil, &blk)
-          chain(blk) { |with| complex_variable(type, '/', count, &with) }
+          complex_variable(type, '/', count, &blk)
         end
         alias_method :multi_var, :multi_variable
         alias_method :mvar, :multi_variable
+        chain_method :multi_variable, :multi_var, :mvar
 
         def repeating_variable(type = nil, &blk)
-          chain(blk) { |with| complex_variable(type, '/', nil, &with) }
+          complex_variable(type, '/', nil, &blk)
         end
         alias_method :glob, :repeating_variable
+        chain_method :repeating_variable, :glob
 
         # Match parts off the path as variables without a leading slash.
         # @see #variable
         # @api public
         def partial_variable(type = nil, &blk)
-          chain(blk) {|with| complex_variable(type, nil, 1, &with) }
+          complex_variable(type, nil, 1, &blk)
         end
         alias_method :part_var, :partial_variable
+        chain_method :partial_variable, :part_var
 
         # Match an extension.
         #
@@ -110,16 +112,15 @@ class Renee
         #
         # @api public
         def extension(ext, &blk)
-          chain(blk) do |with|
-            if detected_extension && match = detected_extension[ext]
-              if match == detected_extension
-                (ext_match = env['PATH_INFO'][/\/?\.#{match}/]) ?
-                  with_path_part(ext_match, &with) : with.call
-              end
+          if detected_extension && match = detected_extension[ext]
+            if match == detected_extension
+              (ext_match = env['PATH_INFO'][/\/?\.#{match}/]) ?
+                with_path_part(ext_match, &blk) : blk.call
             end
           end
         end
         alias_method :ext, :extension
+        chain_method :extension, :ext
 
         # Match no extension.
         #
@@ -128,8 +129,9 @@ class Renee
         #
         # @api public
         def no_extension(&blk)
-          chain(blk) {|with| with.call if detected_extension.nil? }
+          blk.call if detected_extension.nil?
         end
+        chain_method :no_extension
 
         # Match any remaining path.
         #
@@ -138,9 +140,10 @@ class Renee
         #
         # @api public
         def remainder(&blk)
-          chain(blk) { |with| with_path_part(env['PATH_INFO']) { |var| with.call(var) } }
+          with_path_part(env['PATH_INFO']) { |var| blk.call(var) }
         end
         alias_method :catchall, :remainder
+        chain_method :remainder, :catchall
 
         # Respond to a GET request and yield the block.
         #
@@ -151,6 +154,7 @@ class Renee
         def get(path = nil, &blk)
           request_method('GET', path, &blk)
         end
+        chain_method :get
 
         # Respond to a POST request and yield the block.
         #
@@ -161,6 +165,7 @@ class Renee
         def post(path = nil, &blk)
           request_method('POST', path, &blk)
         end
+        chain_method :post
 
         # Respond to a PUT request and yield the block.
         #
@@ -171,6 +176,7 @@ class Renee
         def put(path = nil, &blk)
           request_method('PUT', path, &blk)
         end
+        chain_method :put
 
         # Respond to a DELETE request and yield the block.
         #
@@ -181,6 +187,7 @@ class Renee
         def delete(path = nil, &blk)
           request_method('DELETE', path, &blk)
         end
+        chain_method :delete
 
         # Match only when the path has been completely consumed.
         #
@@ -189,12 +196,11 @@ class Renee
         #
         # @api public
         def complete(&blk)
-          chain(blk) do |with|
-            if env['PATH_INFO'] == '' || is_index_request
-              with_path_part(env['PATH_INFO']) { with.call }
-            end
+          if env['PATH_INFO'] == '' || is_index_request
+            with_path_part(env['PATH_INFO']) { blk.call }
           end
         end
+        chain_method :complete
 
         # Match variables within the query string.
         #
@@ -211,14 +217,13 @@ class Renee
         #
         # @api public
         def query(q, &blk)
-          chain(blk) do |with|
-            case q
-            when Hash  then with.call(Hash[q.map{|(k, v)| [k, transform(v, request[k.to_s]) || return]}])
-            when Array then with.call(*q.map{|qk| request[qk.to_s] or return })
-            else            query([q], &blk)
-            end
+          case q
+          when Hash  then blk.call(Hash[q.map{|(k, v)| [k, transform(v, request[k.to_s]) || return]}])
+          when Array then blk.call(*q.map{|qk| request[qk.to_s] or return })
+          else            query([q], &blk)
           end
         end
+        chain_method :query
 
         # Yield block if the query string matches.
         #
@@ -235,8 +240,9 @@ class Renee
         #
         # @api public
         def query_string(qs, &blk)
-          chain(blk) { |with| with.call if qs === env['QUERY_STRING'] }
+          blk.call if qs === env['QUERY_STRING']
         end
+        chain_method :query_string
 
         private
         def complex_variable(type, prefix, count)
@@ -300,10 +306,9 @@ class Renee
         end
 
         def request_method(method, path = nil, &blk)
-          chain(blk) do |with|
-            path ? whole_path(path) { with.call } : complete { with.call } if env['REQUEST_METHOD'] == method
-          end
+          path ? whole_path(path) { blk.call } : complete { blk.call } if env['REQUEST_METHOD'] == method
         end
+        chain_method :request_method
       end
     end
   end

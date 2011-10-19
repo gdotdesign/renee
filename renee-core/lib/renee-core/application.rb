@@ -1,8 +1,8 @@
 require "renee-core/application/request_context"
+require "renee-core/application/chaining"
 require "renee-core/application/routing"
 require "renee-core/application/responding"
 require "renee-core/application/rack_interaction"
-require "renee-core/application/chaining"
 require "renee-core/application/transform"
 
 class Renee
@@ -13,11 +13,11 @@ class Renee
     # It also has methods to interpret arguments to #halt and redirection response helpers.
     # {RackInteraction} adds methods for interacting with Rack.
     class Application
+      include Chaining
       include RequestContext
       include Routing
       include Responding
       include RackInteraction
-      include Chaining
       include Transform
 
       attr_reader :application_block, :settings
