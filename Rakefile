@@ -42,7 +42,7 @@ task :build do
   end
 end
 
-task :release => :build do
+task :release => [:build, :doc] do
   version_tag = "v#{Renee::VERSION}"
   begin
     raise("#{version_tag} has already been committed") if lsh('git tag').split(/\n/).include?(version_tag)
