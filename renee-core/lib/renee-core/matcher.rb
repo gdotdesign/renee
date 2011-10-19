@@ -21,8 +21,8 @@ class Renee
         val
       end
 
-      def raise_on_error!
-        on_error { halt :bad_request }
+      def raise_on_error!(error_code = :bad_request)
+        on_error { halt error_code }
         self
       end
 
