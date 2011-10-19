@@ -35,6 +35,10 @@ class Renee
         mods.each { |mod| includes << mod }
       end
 
+      # Registers a new variable type for use within {Renee::Application::Routing#variable} and others.
+      # @param [Symbol] name The name of the variable.
+      # @param [Regexp] matcher A regexp describing what part of an arbitrary string to capture.
+      # @return [Renee::Core::Matcher] A matcher
       def register_variable_type(name, matcher)
         matcher = case matcher
         when Matcher then matcher

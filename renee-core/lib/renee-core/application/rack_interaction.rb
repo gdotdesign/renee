@@ -12,6 +12,11 @@ class Renee
           run Rack::Builder.new(&blk).to_app
         end
 
+        # Creates an ad-hoc Rack application within the context of a Rack::Builder that immediately halts when done.
+        # @see #run!
+        # @example
+        #     get { halt build { use Rack::ContentLength; run proc { |env| Rack::Response.new("Hello!").finish } } }
+        #
         def build!(&blk)
           run! build(&blk)
         end
@@ -25,7 +30,7 @@ class Renee
           (app || blk).call(env)
         end
 
-        # Runs a rack application and responds immediately.
+        # Runs a rack application and halts immediately.
         #
         # @see #run
         # @example

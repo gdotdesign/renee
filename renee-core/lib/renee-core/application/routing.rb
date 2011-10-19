@@ -54,8 +54,7 @@ class Renee
 
         # Match parts off the path as variables. The parts matcher can conform to either a regular expression, or be an Integer, or
         # simply a String.
-        # @param[Object] type the type of object to match for. If you supply Integer, this will only match integers in addition to
-        #                     casting your variable for you.
+        # @param[Object] type the type of object to match for. If you supply Integer, this will only match integers in addition to casting your variable for you.
         # @param[Object] default the default value to use if your param cannot be successfully matched.
         #
         # @example
@@ -83,6 +82,9 @@ class Renee
         alias_method :var, :variable
         chain_method :variable, :var
 
+        # Same as variable except you can match multiple variables with the same type.
+        # @param [Range, Integer] count The number of parameters to capture.
+        # @param [Symbol] type The type to use for match.
         def multi_variable(count, type = nil, &blk)
           complex_variable(type, '/', count, &blk)
         end
@@ -90,6 +92,8 @@ class Renee
         alias_method :mvar, :multi_variable
         chain_method :multi_variable, :multi_var, :mvar
 
+        # Same as variable except it matches indefinitely.
+        # @param [Symbol] type The type to use for match.
         def repeating_variable(type = nil, &blk)
           complex_variable(type, '/', nil, &blk)
         end
