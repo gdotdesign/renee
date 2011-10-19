@@ -196,7 +196,7 @@ class Renee
         # Match only when the path has been completely consumed.
         #
         # @example
-        #   delete { halt [200, {}, "hello world"] }
+        #   complete { halt [200, {}, "hello world"] }
         #
         # @api public
         def complete(&blk)
