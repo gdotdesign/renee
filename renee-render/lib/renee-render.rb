@@ -1,5 +1,6 @@
 require 'tilt'
 
+# Top-level Renee constant
 class Renee
   # This module is responsible for handling the rendering of templates
   # using Tilt supporting all included template engines.
@@ -32,9 +33,9 @@ class Renee
     # @return [String] The result of rendering the data with specified engine.
     #
     # @example
-    #  render :haml, "%p test" => "<p>test</p>"
-    #  render :haml, :index => "<p>test</p>"
-    #  render "index" => "<p>test</p>"
+    #  render :haml, "%p test" # => "<p>test</p>"
+    #  render :haml, :index    # => "<p>test</p>"
+    #  render "index"          # => "<p>test</p>"
     #
     # @api public
     #
@@ -44,8 +45,7 @@ class Renee
 
       options                    ||= {}
       options[:outvar]           ||= '@_out_buf'
-      # TODO allow default encoding to be set (as an option)
-      options[:default_encoding] ||= "utf-8"
+      options[:default_encoding] ||= settings.default_encoding || options[:encoding] || "utf-8"
 
       locals         = options.delete(:locals) || {}
       views          = options.delete(:views)  || settings.views_path || "./views"

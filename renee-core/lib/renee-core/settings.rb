@@ -12,6 +12,7 @@ class Renee
       def initialize
         @includes = []
         @variable_types = {}
+        @encoding = 'utf-8'
         register_variable_type :integer, IntegerMatcher
         register_variable_type :int, :integer
       end
@@ -27,6 +28,10 @@ class Renee
       # @api public
       def views_path(path = nil)
         path ? @views_path = path : @views_path
+      end
+
+      def default_encoding(encoding = nil)
+        encoding ? @encoding = encoding : @encoding
       end
 
       # Module(s) to include into the base application.
