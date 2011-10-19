@@ -6,9 +6,9 @@ describe Renee::Render do
 
     it "should allow rendering string with engine" do
       mock_app {
-        path("/a") { get { render! :erb, "<p>test</p>" } }
-        path("/b") { get { render! :erb, "<p><%= foo %></p>", :locals => { :foo => "bar" } } }
-        path("/c") { get { halt render(:erb, "<p><%= foo %></p>", :locals => { :foo => "bar" }) } }
+        path("/a") { get { render_inline! :erb, "<p>test</p>" } }
+        path("/b") { get { render_inline! :erb, "<p><%= foo %></p>", :locals => { :foo => "bar" } } }
+        path("/c") { get { halt render_inline(:erb, "<p><%= foo %></p>", :locals => { :foo => "bar" }) } }
       }
       get('/a')
       assert_equal 200, response.status
@@ -101,14 +101,6 @@ describe Renee::Render do
         get { render! :haml, :foo }
       }
       assert_raises(Renee::Render::TemplateNotFound) { get('/') }
-    end # missing template, with engine
-
-    it "should fail properly rendering invalid data" do
-      create_view :index, "%p test", :haml
-      mock_app {
-        get { render! :haml, /invalid regex data/ }
-      }
-      assert_raises(Renee::Render::RenderError) { get('/') }
     end # missing template, with engine
   end
 end

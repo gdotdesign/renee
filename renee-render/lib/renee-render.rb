@@ -1,4 +1,5 @@
 require 'tilt'
+require 'callsite'
 
 # Top-level Renee constant
 class Renee
@@ -23,6 +24,11 @@ class Renee
       halt render(*args, &blk)
     end
 
+    def render_inline!(*args, &blk)
+      args << Callsite.parse(caller.first)
+      halt render_inline(*args, &blk)
+    end
+
     ##
     # Renders a string given the engine and the content.
     #
@@ -39,9 +45,35 @@ class Renee
     #
     # @api public
     #
-    def render(engine, data=nil, options={}, &block)
-      # Handles the case where engine is unspecified by shifting the data (i.e render "index")
-      engine, data, options = nil, engine.to_sym, data if data.nil? || data.is_a?(Hash)
+    def render(*args, &block)
+      render_setup(args, block) do |engine, data, options, views|
+        template_cache.fetch(engine, data, options) do
+          file_path, engine = find_template(views, data, engine)
+          template = Tilt[engine]
+          raise TemplateNotFound, "Template engine not found: #{engine}" if template.nil?
+          raise TemplateNotFound, "Template '#{data}' not found in '#{engine}'!"  unless file_path
+          # TODO suppress errors for layouts?
+          template.new(file_path, 1, options)
+        end
+      end
+    end # render
+
+    def render_inline(*args, &block)
+      call_data = args.last.is_a?(Callsite::Line) ? args.pop : Callsite.parse(caller.first)
+      path, line = call_data.filename, call_data.line
+      render_setup(args, block) do |engine, data, options, views|
+        body = data.is_a?(String) ? Proc.new { data } : data
+        template = Tilt[engine]
+        raise "Template engine not found: #{engine}" if template.nil?
+        template.new(path, line.to_i, options, &body)
+      end
+    end
+
+    def render_setup(args, block)
+      options = args.last.is_a?(Hash) ? args.pop : {}
+      data = args.pop
+      engine = args.pop
+      engine &&= engine.to_sym
 
       options                    ||= {}
       options[:outvar]           ||= '@_out_buf'
@@ -56,7 +88,7 @@ class Renee
       scope          = options.delete(:scope) || self
 
       # TODO default layout file convention?
-      template       = compile_template(engine, data, options, views)
+      template       = yield(engine, data, options, views)
       output         = template.render(scope, locals, &block)
 
       if layout # render layout
@@ -64,46 +96,8 @@ class Renee
         options = options.merge(:views => views, :layout => false, :scope => scope)
         return render(layout_engine, layout, options.merge(:locals => locals)) { output }
       end
-
       output
-    end # render
-
-    ##
-    # Constructs a template based on engine, data and options.
-    #
-    # @param [Symbol] engine The template engine to use for rendering.
-    # @param [String] data The content or file to render.
-    # @param [Hash] options The rendering options to pass onto tilt.
-    # @param [String] views The view_path from which to locate the template.
-    #
-    # @return [Tilt::Template] The tilt template to render with all required options.
-    # @raise  [TemplateNotFound] The template to render could not be located.
-    # @raise  [RenderError] The template to render could not be located.
-    #
-    # @api private
-    #
-    def compile_template(engine, data, options, views)
-      template_cache.fetch engine, data, options do
-        if data.is_a?(Symbol) # data is template path
-          file_path, engine = find_template(views, data, engine)
-          template = Tilt[engine]
-          raise TemplateNotFound, "Template engine not found: #{engine}" if template.nil?
-          raise TemplateNotFound, "Template '#{data}' not found in '#{views}'!"  unless file_path
-          # TODO suppress errors for layouts?
-          template.new(file_path, 1, options)
-        elsif data.is_a?(String) # data is body string
-          # TODO figure out path based on caller file
-          path, line  = options[:path] || "caller file", options[:line] || 1
-          body = data.is_a?(String) ? Proc.new { data } : data
-          template = Tilt[engine]
-          raise "Template engine not found: #{engine}" if template.nil?
-          template.new(path, line.to_i, options, &body)
-        else # data can't be handled
-          raise RenderError, "Cannot render data #{data.inspect}."
-        end
-      end # template_cache.fetch
-    end # compile_template
-
+    end
     ##
     # Searches view paths for template based on data and engine with rendering options.
     # Supports finding a template without an engine.
