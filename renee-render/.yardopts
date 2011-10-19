@@ -1,4 +1,4 @@
---output-dir ../doc/render
+--output-dir ../../renee-site/public/doc/render
 --readme README.md
 --no-private
 --title Renee Render

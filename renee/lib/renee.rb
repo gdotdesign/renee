@@ -3,6 +3,7 @@ require 'renee-render'
 require 'renee/version'
 
 class Renee
+  # This class defines the factory for rich Renee applications.
   class RichCore < Renee::Core
     def initialize(&blk)
       super

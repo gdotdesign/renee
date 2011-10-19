@@ -25,11 +25,18 @@ renee_gems = %w[
   renee
 ].freeze
 
+versions = renee_gems.map { |g|
+  require "#{ROOT}/#{g}/lib/#{g}/version"
+  g.split('-').map(&:capitalize).inject(Object){|parent, m| parent.const_get(m)}::VERSION
+}.uniq
+
+puts "something is up with the versions: #{versions.inspect}" unless versions.size == 1
+
 desc "build #{renee_gems.join(', ')} gems"
 task :build do
   renee_gems.each do |g|
     Dir.chdir(g) do
-      lsh "gem build #{g}.gemspec"
+      lsh "mkdir -p pkg && gem build #{g}.gemspec && mv *.gem pkg"
       puts "#{g} built"
     end
   end
@@ -64,7 +71,6 @@ task :install => :build do
     end
   end
 end
-
 
 renee_gems_tasks = Hash[renee_gems.map{|rg| [rg, :"test_#{rg.gsub('-', '_')}"]}].freeze
 
