@@ -4,6 +4,7 @@ class Renee
   class Core
     class Application
       module Chaining
+        private
         class ChainingProxy
           def initialize(target, proxy_blk)
             @target, @proxy_blk, @calls = target, proxy_blk, []
