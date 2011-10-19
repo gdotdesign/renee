@@ -29,8 +29,10 @@ class Renee
         path ? @views_path = path : @views_path
       end
 
-      def include(mod)
-        includes << mod
+      # Module(s) to include into the base application.
+      # @param [Module] mods Modules to include.
+      def include(*mods)
+        mods.each { |mod| includes << mod }
       end
 
       def register_variable_type(name, matcher)

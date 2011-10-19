@@ -1,5 +1,6 @@
 class Renee
   class Core
+    # @private
     class Matcher
       attr_accessor :name
 
@@ -42,7 +43,7 @@ class Renee
         if match
           match
         elsif @error_handler
-          raise ClientError.new("There was an error interpreting the value #{val.inspect} for #{name.inspect}", @error_handler)
+          raise ClientError.new("There was an error interpreting the value #{val.inspect} for #{name.inspect}", &@error_handler)
         end
       end
     end

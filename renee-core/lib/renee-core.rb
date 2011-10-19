@@ -7,7 +7,7 @@ require 'renee-core/application'
 require 'renee-core/url_generation'
 require 'renee-core/exceptions'
 
-# Renee top-level constant
+# Top-level Renee constant
 class Renee
   # The top-level class for creating core application.
   # For convience you can also used a method named #Renee
@@ -19,14 +19,18 @@ class Renee
   class Core
     include URLGeneration
 
-    attr_reader :application_block, :settings
+    # The application block used to initialize this application.
+    attr_reader :application_block
+    # The {Settings} object used to initialize this application. 
+    attr_reader :settings
 
     # @param [Proc] application_block The block of code that will be executed on each invocation of call #call.
     #                                 Each time #call is called, a new instance of {Renee::Core::Application} will
     #                                 be created. The block given will be #instance_eval 'd within
     #                                 the context of that new instance.
     #
-    def initialize(&application_block)
+    def initialize(base_application_class = Application, &application_block)
+      @base_application_class = base_application_class
       @application_block = application_block
       @settings = Settings.new
     end
@@ -40,9 +44,8 @@ class Renee
     # @see http://rack.rubyforge.org/doc/SPEC.html
     #
     def call(env)
-      Application.new(settings, &application_block).call(env)
+      application_class.new(settings, &application_block).call(env)
     end
-    alias_method :[], :call
 
     ##
     # Configure settings for your Renee application. Accepts a settings file path
@@ -61,6 +64,15 @@ class Renee
       else               raise "Could not setup with #{path.inspect}"
       end
       self
+    end
+
+    private
+    def application_class
+      @application_class ||= begin
+        app_cls = Class.new(@base_application_class)
+        settings.includes.each { |inc| app_cls.send(:include, inc) }
+        app_cls
+      end
     end
   end
 end

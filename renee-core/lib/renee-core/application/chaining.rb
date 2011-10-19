@@ -3,8 +3,18 @@ require 'set'
 class Renee
   class Core
     class Application
+      # Module for creating chainable methods. To use this within your own modules, first `include Chaining`, then,
+      # mark methods you want to be available with `chain_method :method_name`.
+      # @example
+      #    module MoreRoutingMethods
+      #      include Chaining
+      #      def other_routing_method
+      #        # ..
+      #      end
+      #      chain_method :other_routing_method
+      #
       module Chaining
-        private
+        # @private
         class ChainingProxy
           def initialize(target, proxy_blk)
             @target, @proxy_blk, @calls = target, proxy_blk, []
@@ -34,6 +44,7 @@ class Renee
           end
         end
 
+        # @private
         module ClassMethods
           def chain_method(*methods)
             methods.each do |m|

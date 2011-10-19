@@ -62,7 +62,7 @@ class Renee
         generator = url_generators[name]
         generator ? generator.url(*args) : raise("Generator for #{name} doesn't exist")
       end
-
+      
       private
       def url_generators
         @url_generators ||= {}
@@ -72,7 +72,6 @@ class Renee
         @generation_defaults && defaults ? @generation_defaults.merge(defaults) : (defaults || @generation_defaults)
       end
 
-      # Manages generating paths and urls for a given name.
       # @private
       class Generator
         attr_reader :defaults
