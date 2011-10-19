@@ -7,8 +7,8 @@ Gem::Specification.new do |s|
   s.version     = Renee::Core::VERSION
   s.authors     = ["Josh Hull", "Nathan Esquenazi", "Arthur Chiu"]
   s.email       = ["joshbuddy@gmail.com", "nesquena@gmail.com", "mr.arthur.chiu@gmail.com"]
-  s.homepage    = ""
-  s.summary     = %q{The super-friendly rack helpers.}
+  s.homepage    = "http://reneerb.com"
+  s.summary     = %q{The super-friendly rack helpers}
   s.description = %q{The super-friendly rack helpers.}
 
   s.rubyforge_project = "renee"

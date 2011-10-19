@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = Renee::Render::VERSION
   s.authors     = ["Josh Hull", "Nathan Esquenazi", "Arthur Chiu"]
   s.email       = ["joshbuddy@gmail.com", "nesquena@gmail.com", "mr.arthur.chiu@gmail.com"]
-  s.homepage    = ""
+  s.homepage    = "http://reneerb.com"
   s.summary     = %q{The super-friendly web framework rendering component}
   s.description = %q{The super-friendly web framework rendering component.}
 
