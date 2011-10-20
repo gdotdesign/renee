@@ -6,9 +6,9 @@ describe Renee::Render do
 
     it "should allow rendering string with engine" do
       mock_app {
-        path("/a") { get { render_inline! :erb, "<p>test</p>" } }
-        path("/b") { get { render_inline! :erb, "<p><%= foo %></p>", :locals => { :foo => "bar" } } }
-        path("/c") { get { halt render_inline(:erb, "<p><%= foo %></p>", :locals => { :foo => "bar" }) } }
+        path("/a") { get { inline! "<p>test</p>", :erb } }
+        path("/b") { get { inline! "<p><%= foo %></p>", :erb, :locals => { :foo => "bar" } } }
+        path("/c") { get { halt inline("<p><%= foo %></p>", :erb, :locals => { :foo => "bar" }) } }
       }
       get('/a')
       assert_equal 200, response.status
@@ -25,9 +25,9 @@ describe Renee::Render do
       create_view :index, "%p test", :haml
       create_view :foo,   "%p= foo", :haml
       mock_app {
-        path("/a") { get { render! :haml, :index } }
-        path("/b") { get { render! :haml, :foo, :locals => { :foo => "bar" } } }
-        path("/c") { get { halt render(:haml, :foo, :locals => { :foo => "bar" }) } }
+        path("/a") { get { render! 'index', :haml } }
+        path("/b") { get { render! 'foo', :haml, :locals => { :foo => "bar" } } }
+        path("/c") { get { halt render('foo', :haml, :locals => { :foo => "bar" }) } }
       }
       get('/a')
       assert_equal 200, response.status
@@ -60,8 +60,8 @@ describe Renee::Render do
       create_view :foo,   "%p= foo", :haml
       create_view :layout, "%div.wrapper= yield", :haml
       mock_app {
-        path("/a") { get { render! :haml, :index, :layout => :layout } }
-        path("/b") { get { render! :foo, :layout => :layout, :locals => { :foo => "bar" } } }
+        path("/a") { get { render! 'index', :haml, :layout => :layout } }
+        path("/b") { get { render! 'foo', :layout => :layout, :locals => { :foo => "bar" } } }
       }
       get('/a')
       assert_equal 200, response.status
@@ -76,8 +76,8 @@ describe Renee::Render do
       create_view :foo,   "%p= foo", :haml
       create_view :base, "<div class='wrapper'><%= yield %></div>", :erb
       mock_app {
-        path("/a") { get { render! :haml, :index, :layout => :base, :layout_engine => :erb } }
-        path("/b") { get { render! :foo, :layout => :base, :locals => { :foo => "bar" } } }
+        path("/a") { get { render! 'index', :haml, :layout => 'base', :layout_engine => :erb } }
+        path("/b") { get { render! 'foo', :haml, :layout => 'base', :locals => { :foo => "bar" } } }
       }
       get('/a')
       assert_equal 200, response.status
