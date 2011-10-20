@@ -28,10 +28,12 @@ class ReneeCore
   #                                 be created. The block given will be #instance_eval 'd within
   #                                 the context of that new instance.
   #
-  def initialize(base_application_class = Application, &application_block)
-    @base_application_class = base_application_class
+  def initialize(&application_block)
     @application_block = application_block
-    @settings = Settings.new
+  end
+
+  def settings
+    @settings ||= Settings.new
   end
 
   # This is a rack-compliant `Rack#call`.
@@ -69,10 +71,14 @@ class ReneeCore
     self
   end
 
+  def self.base_application_class
+    Application
+  end
+
   private
   def application_class
     @application_class ||= begin
-      app_cls = Class.new(@base_application_class)
+      app_cls = Class.new(self.class.base_application_class)
       settings.includes.each { |inc| app_cls.send(:include, inc) }
       app_cls
     end

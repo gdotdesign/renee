@@ -16,10 +16,14 @@ class Renee < ReneeCore
 
   VERSION = RENEE_CORE_VERSION
 
+  def self.base_application_class
+    Application
+  end
+
   # Creates a new Renee application.
   # @yield The application definition.
   def initialize(&blk)
-    super(Application, &blk)
+    super(&blk)
   end
 
   # @private
