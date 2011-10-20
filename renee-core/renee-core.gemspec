@@ -4,7 +4,7 @@ require "renee_core/version"
 
 Gem::Specification.new do |s|
   s.name        = "renee-core"
-  s.version     = ReneeCore::VERSION
+  s.version     = RENEE_CORE_VERSION
   s.authors     = ["Josh Hull", "Nathan Esquenazi", "Arthur Chiu"]
   s.email       = ["joshbuddy@gmail.com", "nesquena@gmail.com", "mr.arthur.chiu@gmail.com"]
   s.homepage    = "http://reneerb.com"

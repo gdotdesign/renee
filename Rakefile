@@ -1,7 +1,5 @@
 ROOT = File.expand_path(File.dirname(__FILE__))
 
-require File.join(ROOT, 'renee', 'lib', 'renee', 'version')
-
 task :default => :test
 
 def lsh(cmd, &block)
@@ -20,17 +18,10 @@ def lsh_with_code(cmd, &block)
 end
 
 renee_gems = %w[
-  renee_core
-  renee_render
+  renee-core
+  renee-render
   renee
 ].freeze
-
-versions = renee_gems.map { |g|
-  require "#{ROOT}/#{g}/lib/#{g}/version"
-  g.split('-').map(&:capitalize).inject(Object){|parent, m| parent.const_get(m)}::VERSION
-}.uniq
-
-puts "something is up with the versions: #{versions.inspect}" unless versions.size == 1
 
 desc "build #{renee_gems.join(', ')} gems"
 task :build do
@@ -43,6 +34,7 @@ task :build do
 end
 
 task :release => [:build, :doc] do
+  require File.join(ROOT, 'renee', 'lib', 'renee', 'version')
   version_tag = "v#{Renee::VERSION}"
   begin
     raise("#{version_tag} has already been committed") if lsh('git tag').split(/\n/).include?(version_tag)
@@ -64,6 +56,7 @@ task :release => [:build, :doc] do
 end
 
 task :install => :build do
+  require File.join(ROOT, 'renee', 'lib', 'renee', 'version')
   renee_gems.each do |g|
     Dir.chdir(g) do
       lsh "gem install pkg/#{g}-#{Renee::VERSION}.gem"

@@ -14,6 +14,9 @@ end
 
 # Top-level Renee constant.
 class Renee < ReneeCore
+
+  VERSION = RENEE_CORE_VERSION
+
   # Creates a new Renee application.
   # @yield The application definition.
   def initialize(&blk)

@@ -1,10 +1,11 @@
 require 'tilt'
 require 'callsite'
-require 'renee_render/version'
 
 # This module is responsible for handling the rendering of templates
 # using Tilt supporting all included template engines.
-class ReneeRender
+module ReneeRender
+  VERSION = RENEE_CORE_VERSION
+
   ##
   # Exception responsible for when an expected template does not exist.
   #

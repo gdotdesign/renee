@@ -17,6 +17,8 @@ require 'renee_core/exceptions'
 class ReneeCore
   include URLGeneration
 
+  VERSION = RENEE_CORE_VERSION
+
   # The application block used to initialize this application.
   attr_reader :application_block
   # The {Settings} object used to initialize this application. 
@@ -42,7 +44,7 @@ class ReneeCore
   # @see http://rack.rubyforge.org/doc/SPEC.html
   #
   def call(env)
-    new(settings, &application_block).call(env)
+    application_class.new(settings, &application_block).call(env)
   end
 
   def app(&application_block)

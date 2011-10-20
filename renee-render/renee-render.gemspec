@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
-$:.push File.expand_path("../lib", __FILE__)
-require "renee_render/version"
+$:.push File.expand_path("../../renee-core/lib", __FILE__)
+require "renee_core/version"
 
 Gem::Specification.new do |s|
   s.name        = "renee-render"
-  s.version     = ReneeRender::VERSION
+  s.version     = RENEE_CORE_VERSION
   s.authors     = ["Josh Hull", "Nathan Esquenazi", "Arthur Chiu"]
   s.email       = ["joshbuddy@gmail.com", "nesquena@gmail.com", "mr.arthur.chiu@gmail.com"]
   s.homepage    = "http://reneerb.com"
