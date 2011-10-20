@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
-$:.push File.expand_path("../lib", __FILE__)
-require "renee/version"
+$:.push File.expand_path("../../renee-core/lib", __FILE__)
+require "renee_core/version"
 
 Gem::Specification.new do |s|
   s.name        = "renee"

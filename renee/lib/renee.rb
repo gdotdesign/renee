@@ -1,6 +1,5 @@
 require 'renee_core'
 require 'renee_render'
-require 'renee/version'
 
 # Method for creating new Renee applications.
 # @see http://reneerb.com
