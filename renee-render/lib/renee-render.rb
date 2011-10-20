@@ -7,14 +7,9 @@ class Renee
   # using Tilt supporting all included template engines.
   module Render
     ##
-    # Exception responsible for when a generic rendering error occurs.
-    #
-    class RenderError < RuntimeError; end
-
-    ##
     # Exception responsible for when an expected template does not exist.
     #
-    class TemplateNotFound < RenderError; end
+    class TemplateNotFound < RuntimeError; end
 
     # Same as render but automatically halts.
     # @param  (see #render)
@@ -24,6 +19,10 @@ class Renee
       halt render(file, engine, options, &blk)
     end
 
+    # Same as inline but automatically halts.
+    # @param  (see #inline)
+    # @return (see #inline)
+    # @see #inline
     def inline!(data, engine, options = {}, &blk)
       options[:_caller] = Callsite.parse(caller.first)
       halt inline(data, engine, options, &blk)
