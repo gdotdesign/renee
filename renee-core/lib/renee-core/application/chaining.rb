@@ -59,6 +59,7 @@ class Renee
           end
         end
 
+        private
         def chain(blk, &proxy)
           blk ? yield(blk) : ChainingProxy.new(self, proxy)
         end

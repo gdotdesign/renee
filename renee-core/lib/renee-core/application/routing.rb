@@ -43,7 +43,7 @@ class Renee
         end
         chain_method :exact_path
 
-        # Like #path, doesn't look for leading slashes.
+        # Like #path, but doesn't look for leading slashes.
         def part(p, &blk)
           p = /\/?#{Regexp.quote(p)}/ if p.is_a?(String)
           if match = env['PATH_INFO'][p]

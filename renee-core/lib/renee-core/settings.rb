@@ -17,7 +17,7 @@ class Renee
         register_variable_type :int, :integer
       end
 
-      # Get or sets the views_path for an application.
+      # Gets or sets the views_path for an application.
       #
       # @param [String] path The path to the view files.
       #
@@ -30,11 +30,15 @@ class Renee
         path ? @views_path = path : @views_path
       end
 
+      # Gets or sets the default encoding used.
+      #
+      # @param [String] encoding The encoding to use. e.g. "utf-8"
       def default_encoding(encoding = nil)
         encoding ? @encoding = encoding : @encoding
       end
 
       # Module(s) to include into the base application.
+      #
       # @param [Module] mods Modules to include.
       def include(*mods)
         mods.each { |mod| includes << mod }
