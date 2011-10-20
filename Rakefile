@@ -20,8 +20,8 @@ def lsh_with_code(cmd, &block)
 end
 
 renee_gems = %w[
-  renee-core
-  renee-render
+  renee_core
+  renee_render
   renee
 ].freeze
 

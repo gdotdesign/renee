@@ -1,9 +1,9 @@
 require File.expand_path('../test_helper', __FILE__)
 
-describe Renee::Core::Application::Routing do
+describe ReneeCore::Application::Routing do
 
   def renee_for(path, options = {}, &block)
-    Renee::Core.new(&block).call(Rack::MockRequest.env_for(path, options))
+    ReneeCore.new(&block).call(Rack::MockRequest.env_for(path, options))
   end
 
   describe "with paths" do
@@ -403,7 +403,7 @@ describe Renee::Core::Application::Routing do
       type = { 'Content-Type' => 'text/plain' }
       mock_app do
         path 'test' do
-          halt run Renee::Core.new {
+          halt run ReneeCore.new {
             path 'time' do
               halt halt [200,type,['test']]
             end
@@ -419,7 +419,7 @@ describe Renee::Core::Application::Routing do
       type = { 'Content-Type' => 'text/plain' }
       mock_app do
         path 'test' do
-          run! Renee::Core.new {
+          run! ReneeCore.new {
             path 'time' do
               halt halt [200,type,['test']]
             end

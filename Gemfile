@@ -1,8 +1,8 @@
 source :rubygems
 
-gemspec :path => "renee"
-gemspec :path => "renee-core"
-gemspec :path => "renee-render"
+gemspec :path => File.expand_path("../renee", __FILE__)
+gemspec :path => File.expand_path("../renee_core", __FILE__)
+gemspec :path => File.expand_path("../renee_render", __FILE__)
 
 group :development do
   gem 'rdiscount'

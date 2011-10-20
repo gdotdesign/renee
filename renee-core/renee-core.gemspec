@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "renee-core/version"
+require "renee_core/version"
 
 Gem::Specification.new do |s|
   s.name        = "renee-core"
-  s.version     = Renee::Core::VERSION
+  s.version     = ReneeCore::VERSION
   s.authors     = ["Josh Hull", "Nathan Esquenazi", "Arthur Chiu"]
   s.email       = ["joshbuddy@gmail.com", "nesquena@gmail.com", "mr.arthur.chiu@gmail.com"]
   s.homepage    = "http://reneerb.com"

@@ -3,7 +3,7 @@
 Rendering templates in Renee should be familiar and intuitive using the `render` command:
 
 ```ruby
-run Renee::Core.new {
+run ReneeCore.new {
  path('blog') do
    get { render! "blogs/index", :haml }
  end

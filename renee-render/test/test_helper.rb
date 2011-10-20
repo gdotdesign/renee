@@ -1,10 +1,10 @@
-$: << File.expand_path('../../../renee-core/lib', __FILE__)
+$: << File.expand_path('../../../renee_core/lib', __FILE__)
 $: << File.expand_path('../../lib', __FILE__)
-require 'renee-core'
-require 'renee-render'
+require 'renee_core'
+require 'renee_render'
 
 # TODO better registration method (?)
-Renee::Core::Application.send(:include, Renee::Render)
+ReneeCore::Application.send(:include, ReneeRender)
 
 # Load shared test helpers
 require File.expand_path('../../../lib/test_helper', __FILE__)

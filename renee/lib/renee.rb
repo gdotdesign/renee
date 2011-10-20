@@ -1,5 +1,5 @@
-require 'renee-core'
-require 'renee-render'
+require 'renee_core'
+require 'renee_render'
 require 'renee/version'
 
 # Method for creating new Renee applications.
@@ -9,23 +9,19 @@ require 'renee/version'
 #       halt "hello renee"
 #     }
 def Renee(&blk)
-  Renee::RichCore.new(&blk)
+  Renee.new(&blk)
 end
 
 # Top-level Renee constant.
-class Renee
-  # Analogous to {Renee::Core}, but with all features enabled.
-  # @see http://reneerb.com
-  class RichCore < Renee::Core
-    # Creates a new Renee application.
-    # @yield The application definition.
-    def initialize(&blk)
-      super(Application, &blk)
-    end
+class Renee < ReneeCore
+  # Creates a new Renee application.
+  # @yield The application definition.
+  def initialize(&blk)
+    super(Application, &blk)
+  end
 
-    # @private
-    class Application < Renee::Core::Application
-      include Renee::Render
-    end
+  # @private
+  class Application < ReneeCore::Application
+    include ReneeRender
   end
 end

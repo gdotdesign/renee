@@ -1,6 +1,6 @@
 require File.expand_path('../test_helper', __FILE__)
 
-describe Renee::Core::Matcher do
+describe ReneeCore::Matcher do
   it "should transform variables" do
     mock_app {
       var :symbol do |i|

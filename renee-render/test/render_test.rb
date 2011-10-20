@@ -1,6 +1,6 @@
 require File.expand_path('../test_helper', __FILE__)
 
-describe Renee::Render do
+describe ReneeRender do
   describe "#render" do
     after  { remove_views }
 
@@ -92,7 +92,7 @@ describe Renee::Render do
       mock_app {
         get { render! :fake, :index }
       }
-      assert_raises(Renee::Render::TemplateNotFound) { get('/') }
+      assert_raises(ReneeRender::TemplateNotFound) { get('/') }
     end # template, invalid engine
 
     it "should fail properly rendering missing template file with engine" do
@@ -100,7 +100,7 @@ describe Renee::Render do
       mock_app {
         get { render! :haml, :foo }
       }
-      assert_raises(Renee::Render::TemplateNotFound) { get('/') }
+      assert_raises(ReneeRender::TemplateNotFound) { get('/') }
     end # missing template, with engine
   end
 end

@@ -3,8 +3,8 @@ gem 'minitest'
 require 'minitest/autorun'
 gem 'rack-test'
 require 'rack/test'
-$: << File.expand_path('../../../renee-core/lib', __FILE__)
-$: << File.expand_path('../../../renee-render/lib', __FILE__)
+$: << File.expand_path('../../../renee_core/lib', __FILE__)
+$: << File.expand_path('../../../renee_render/lib', __FILE__)
 $: << File.expand_path('../../lib', __FILE__)
 require 'renee'
 
