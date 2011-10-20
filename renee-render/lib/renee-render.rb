@@ -84,6 +84,7 @@ class Renee
       end
     end
 
+    private
     def render_setup(engine, options, block)
       options                    ||= {}
       options[:outvar]           ||= '@_out_buf'
@@ -109,6 +110,7 @@ class Renee
         output
       end
     end
+
     ##
     # Searches view paths for template based on data and engine with rendering options.
     # Supports finding a template without an engine.
