@@ -9,6 +9,7 @@ require 'renee_core/request_context'
 require 'renee_core/transform'
 require 'renee_core/routing'
 require 'renee_core/responding'
+require 'renee_core/env_accessors'
 
 # The top-level class for creating core application.
 # For convience you can also used a method named #Renee
@@ -73,6 +74,7 @@ class ReneeCore
   include Responding
   include RackInteraction
   include Transform
+  include EnvAccessors
 end
 
 def ReneeCore(&blk)
