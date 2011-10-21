@@ -4,6 +4,8 @@ class ReneeCore
     module RackInteraction
 
       # Creates an ad-hoc Rack application within the context of a Rack::Builder.
+      # @yield The block to be used to instantiate the `Rack::Builder`.
+      #
       # @example
       #     get { halt build { use Rack::ContentLength; run proc { |env| Rack::Response.new("Hello!").finish } } }
       #
@@ -12,7 +14,8 @@ class ReneeCore
       end
 
       # Creates an ad-hoc Rack application within the context of a Rack::Builder that immediately halts when done.
-      # @see #run!
+      # @param (see #build)
+      #
       # @example
       #     get { halt build { use Rack::ContentLength; run proc { |env| Rack::Response.new("Hello!").finish } } }
       #
@@ -20,14 +23,11 @@ class ReneeCore
         run! build(&blk)
       end
 
-      def middleware!(*args, &blk)
-        build! do
-          use *args
-          run Renee(&blk)
-        end
-      end
-
-      # Runs a rack application
+      # Runs a rack application. You must either use `app` or `blk`.
+      # @param [#call] app The application to call.
+      # @yield [env] The block to yield to
+      #
+      #
       # @example
       #     get { halt run proc { |env| ReneeCore::Response.new("Hello!").finish } }
       #
@@ -37,13 +37,14 @@ class ReneeCore
       end
 
       # Runs a rack application and halts immediately.
+      # @param (see #run)
       #
-      # @see #run
+      # @see #run!
       # @example
       #     get { run proc { |env| ReneeCore::Response.new("Hello!").finish } }
       #
-      def run!(*args)
-        halt run(*args)
+      def run!(app = nil, &blk)
+        halt run(app, &blk)
       end
     end
   end

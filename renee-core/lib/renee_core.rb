@@ -16,6 +16,7 @@ require 'renee_core/exceptions'
 class ReneeCore
   include URLGeneration
 
+  # The current version of ReneeCore
   VERSION = RENEE_CORE_VERSION
 
   # The application block used to initialize this application.

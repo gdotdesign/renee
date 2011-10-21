@@ -8,7 +8,7 @@ require "renee_core/application/transform"
 class ReneeCore
   # This is the main class used to do the respond to requests. {Routing} provides route helpers.
   # {RequestContext} adds the RequestContext#call method to respond to Rack applications.
-  # {Responding} defines the method Responding#halt which stops processing within a {Renee::Application}.
+  # {Responding} defines the method Responding#halt which stops processing within a {ReneeCore::Application}.
   # It also has methods to interpret arguments to #halt and redirection response helpers.
   # {RackInteraction} adds methods for interacting with Rack.
   class Application

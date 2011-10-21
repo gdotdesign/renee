@@ -43,7 +43,7 @@ class ReneeCore
       mods.each { |mod| includes << mod }
     end
 
-    # Registers a new variable type for use within {Renee::Application::Routing#variable} and others.
+    # Registers a new variable type for use within {ReneeCore::Application::Routing#variable} and others.
     # @param [Symbol] name The name of the variable.
     # @param [Regexp] matcher A regexp describing what part of an arbitrary string to capture.
     # @return [ReneeCore::Matcher] A matcher

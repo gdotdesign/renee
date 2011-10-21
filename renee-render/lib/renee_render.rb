@@ -4,6 +4,7 @@ require 'callsite'
 # This module is responsible for handling the rendering of templates
 # using Tilt supporting all included template engines.
 module ReneeRender
+  # The current version of ReneeRender
   VERSION = RENEE_CORE_VERSION
 
   ##
