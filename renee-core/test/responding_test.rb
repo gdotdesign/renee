@@ -1,6 +1,6 @@
 require File.expand_path('../test_helper', __FILE__)
 
-describe ReneeCore::Application::Responding do
+describe ReneeCore::Responding do
   describe "#interpret_response" do
     it "should render from a number" do
       mock_app do

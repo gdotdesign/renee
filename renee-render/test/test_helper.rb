@@ -4,7 +4,7 @@ require 'renee_core'
 require 'renee_render'
 
 # TODO better registration method (?)
-ReneeCore::Application.send(:include, ReneeRender)
+ReneeCore.send(:include, ReneeRender)
 
 # Load shared test helpers
 require File.expand_path('../../../lib/test_helper', __FILE__)

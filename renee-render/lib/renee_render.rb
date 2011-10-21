@@ -7,6 +7,32 @@ module ReneeRender
   # The current version of ReneeRender
   VERSION = RENEE_CORE_VERSION
 
+  def self.included(o)
+    o.extend(ClassMethods)
+  end
+
+  module ClassMethods
+    # Gets or sets the views_path for an application.
+    #
+    # @param [String] path The path to the view files.
+    #
+    # @example
+    #  views_path("./views") => nil
+    #  views_path => "./views"
+    #
+    # @api public
+    def views_path(path = nil)
+      path ? @views_path = path : @views_path
+    end
+
+    # Gets or sets the default encoding used.
+    #
+    # @param [String] encoding The encoding to use. e.g. "utf-8"
+    def default_encoding(encoding = nil)
+      encoding ? @encoding = encoding : @encoding
+    end
+  end
+
   ##
   # Exception responsible for when an expected template does not exist.
   #
@@ -89,10 +115,10 @@ module ReneeRender
   def render_setup(engine, options, block)
     options                    ||= {}
     options[:outvar]           ||= '@_out_buf'
-    options[:default_encoding] ||= settings.default_encoding || options[:encoding] || "utf-8"
+    options[:default_encoding] ||= self.class.default_encoding || options[:encoding] || "utf-8"
 
     locals         = options.delete(:locals) || {}
-    views          = options.delete(:views)  || settings.views_path || "./views"
+    views          = options.delete(:views)  || self.class.views_path || "./views"
     layout         = options.delete(:layout)
     layout_engine  = options.delete(:layout_engine)
     # TODO suppress template errors for layouts?

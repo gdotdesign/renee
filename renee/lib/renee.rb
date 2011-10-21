@@ -8,29 +8,14 @@ require 'renee_render'
 #       halt "hello renee"
 #     }
 def Renee(&blk)
-  Renee.new(&blk)
+  Class.new(Renee).app(&blk)
 end
 
 # Top-level Renee constant.
 class Renee < ReneeCore
 
+  include ReneeRender
+
   # The current version of Renee
   VERSION = RENEE_CORE_VERSION
-
-  # The class used as the basis for calls made to Renee
-  # @see ReneeCore#application_class
-  def self.base_application_class
-    Application
-  end
-
-  # Creates a new Renee application.
-  # @yield The application definition.
-  def initialize(&blk)
-    super(&blk)
-  end
-
-  # @private
-  class Application < ReneeCore::Application
-    include ReneeRender
-  end
 end

@@ -1,84 +1,82 @@
 require 'rack'
 require 'renee_core/matcher'
-require 'renee_core/settings'
+require 'renee_core/chaining'
 require 'renee_core/response'
-require 'renee_core/application'
 require 'renee_core/url_generation'
 require 'renee_core/exceptions'
+require 'renee_core/rack_interaction'
+require 'renee_core/request_context'
+require 'renee_core/transform'
+require 'renee_core/routing'
+require 'renee_core/responding'
 
 # The top-level class for creating core application.
 # For convience you can also used a method named #Renee
 # for decalaring new instances.
 #
 # @example
-#     ReneeCore.new { path('/hello') { halt :ok } }
+#     ReneeCore { path('/hello') { halt :ok } }
 #
 class ReneeCore
-  include URLGeneration
-
   # The current version of ReneeCore
   VERSION = RENEE_CORE_VERSION
 
-  # The application block used to initialize this application.
-  attr_reader :application_block
-  # The {Settings} object used to initialize this application. 
-  attr_reader :settings
+  module ClassMethods
+    attr_reader :application_block
 
-  # @param [Proc] application_block The block of code that will be executed on each invocation of call #call.
-  #                                 Each time #call is called, a new instance of {ReneeCore::Application} will
-  #                                 be created. The block given will be #instance_eval 'd within
-  #                                 the context of that new instance.
-  #
-  def initialize(&application_block)
-    @application_block = application_block
-  end
-
-  def settings
-    @settings ||= Settings.new
-  end
-
-  # This is a rack-compliant `Rack#call`.
-  #
-  # @param [Hash] env The environment hash.
-  #
-  # @return [Array] A rack compliant return.
-  #
-  # @see http://rack.rubyforge.org/doc/SPEC.html
-  #
-  def call(env)
-    application_class.new(settings, &application_block).call(env)
-  end
-
-  ##
-  # Configure settings for your Renee application. Accepts a settings file path
-  # or a block containing the configuration settings.
-  #
-  # @example
-  #  ReneeCore.new { ... }.setup { views_path "./views" }
-  #
-  # @api public
-  def setup(path = nil, &blk)
-    raise "You cannot supply both an argument and a block to the method." unless path.nil? ^ blk.nil?
-    case path
-    when nil      then settings.instance_eval(&blk)
-    when Settings then @settings = path
-    when String   then File.exist?(path) ? settings.instance_eval(File.read(path), path, 1) : raise("The settings file #{path} does not exist")
-    else               raise "Could not setup with #{path.inspect}"
+    include URLGeneration
+    def call(env)
+      new.call(env)
     end
-    self
-  end
 
-  # The class used as the basis for calls made to ReneeCore
-  def self.base_application_class
-    Application
-  end
+    def app(&app)
+      @application_block = app
+      setup do
+        register_variable_type :integer, IntegerMatcher
+        register_variable_type :int, :integer
+      end
+      self
+    end
 
-  private
-  def application_class
-    @application_class ||= begin
-      app_cls = Class.new(self.class.base_application_class)
-      settings.includes.each { |inc| app_cls.send(:include, inc) }
-      app_cls
+    def setup(&blk)
+      instance_eval(&blk)
+      self
+    end
+
+    def variable_types
+      @variable_types ||= {}
+    end
+
+    # Registers a new variable type for use within {ReneeCore::Routing#variable} and others.
+    # @param [Symbol] name The name of the variable.
+    # @param [Regexp] matcher A regexp describing what part of an arbitrary string to capture.
+    # @return [ReneeCore::Matcher] A matcher
+    def register_variable_type(name, matcher)
+      matcher = case matcher
+      when Matcher then matcher
+      when Array   then Matcher.new(matcher.map{|m| variable_types[m]})
+      when Symbol  then variable_types[matcher]
+      else              Matcher.new(matcher)
+      end
+      matcher.name = name
+      variable_types[name] = matcher
     end
   end
+
+  class << self
+    include ClassMethods
+  end
+
+  include Chaining
+  include RequestContext
+  include Routing
+  include Responding
+  include RackInteraction
+  include Transform
+end
+
+def ReneeCore(&blk)
+  cls = Class.new(ReneeCore)
+  cls.app(&blk) if blk
+  cls
 end
