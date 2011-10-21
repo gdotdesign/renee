@@ -14,8 +14,11 @@ end
 # Top-level Renee constant.
 class Renee < ReneeCore
 
+  # The current version of Renee
   VERSION = RENEE_CORE_VERSION
 
+  # The class used as the basis for calls made to Renee
+  # @see ReneeCore#application_class
   def self.base_application_class
     Application
   end

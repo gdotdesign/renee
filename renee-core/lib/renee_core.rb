@@ -49,10 +49,6 @@ class ReneeCore
     application_class.new(settings, &application_block).call(env)
   end
 
-  def app(&application_block)
-    @application_block = application_block
-  end
-
   ##
   # Configure settings for your Renee application. Accepts a settings file path
   # or a block containing the configuration settings.
@@ -72,6 +68,7 @@ class ReneeCore
     self
   end
 
+  # The class used as the basis for calls made to ReneeCore
   def self.base_application_class
     Application
   end
