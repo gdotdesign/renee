@@ -80,7 +80,7 @@ In your rackup file, give this a go!
 ```ruby
 require 'renee'
 
-run ReneeCore {
+run Renee.core {
   path('test') do
     get { halt "Hey, this is a get!" }
     post { halt "and .. a post" }
@@ -99,7 +99,7 @@ A more complete example might be sample RESTful routing definitions for a blog p
 ```ruby
 require 'renee'
 
-run ReneeCore {
+run Renee.core {
   path('posts') do
     @posts = Post.all
     # GET /posts

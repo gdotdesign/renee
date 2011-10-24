@@ -41,7 +41,7 @@ class MiniTest::Spec
   # the application.
   def mock_app(&block)
     path = default_views_path
-    @app = ReneeCore(&block).setup {
+    @app = Renee.core(&block).setup {
       views_path(path) if respond_to?(:views_path)
     }
   end

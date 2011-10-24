@@ -10,7 +10,7 @@ for far more flexibility and freedom in the way that routes and actions are defi
 The bread and butter of Renee are the request verbs reminiscent of Sinatra:
 
 ```ruby
-run ReneeCore {
+run Renee.core {
   get    { halt "a get!"  }
   post   { halt "a post!" }
   put    { halt "a put!"  }
@@ -26,7 +26,7 @@ specify the http verb and the use of `halt` inside the block to send back the bo
 Path is how Renee describes the basic uri path for a route:
 
 ```ruby
-run ReneeCore {
+run Renee.core {
   path('blog') { ... }
 }
 ```
@@ -34,7 +34,7 @@ run ReneeCore {
 All declarations inside that block will start with `/blog`. Paths can also be nested within one another:
 
 ```ruby
-run ReneeCore {
+run Renee.core {
   path('blog') {
     path('foo') { get { halt "path is /blog/foo" } }
   }
@@ -152,7 +152,7 @@ Once you have defined your routes, you can then "register" a particular path map
 having to specify the entire path:
 
 ```ruby
-run ReneeCore {
+run Renee.core {
   register(:test, '/test/time')
   register(:test_var, '/test/:id')
 }
@@ -194,7 +194,7 @@ run Renee {
 Halting is the easiest way to render data within a route:
 
 ```ruby
-run ReneeCore {
+run Renee.core {
   get { halt 'easy' }
 }
 ```

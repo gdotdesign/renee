@@ -2,9 +2,9 @@
 
 require File.expand_path('../test_helper', __FILE__)
 
-describe ReneeCore::EnvAccessors do
+describe Renee::Core::EnvAccessors do
   it "should allow accessing the env" do
-    @app = ReneeCore {
+    @app = Renee.core {
       self.test = 'hello'
       path('test').get do
         halt "test is #{test}"
