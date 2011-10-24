@@ -2,7 +2,10 @@ module Renee
   class Core
     # Defines class-level methods for creating accessors for variables in your environment.
     module EnvAccessors
+      InvalidEnvName = Class.new(RuntimeError)
+
       module ClassMethods
+        
         def env_accessor(*attrs)
           env_reader(*attrs)
           env_writer(*attrs)
@@ -37,9 +40,8 @@ module Renee
                 yield k, v
               end
             else
-              env_key = a
-              attr_method = a.to_s.gsub(/-\./, '_').downcase
-              yield env_key, attr_method
+              raise InvalidEnvName, "Called env attr for #{a.inspect}, to use this, call your env method like this. env_reader #{a.inspect} => #{a.to_s.gsub(/-\./, '_').to_sym.inspect}" if a.to_s[/[-\.]/]
+              yield a, a.to_sym
             end
           end
         end

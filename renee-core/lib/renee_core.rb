@@ -76,10 +76,6 @@ module Renee
       end
     end
 
-    class << self
-      include ClassMethods
-    end
-
     include Chaining
     include RequestContext
     include Routing
@@ -87,5 +83,9 @@ module Renee
     include RackInteraction
     include Transform
     include EnvAccessors
+
+    class << self
+      include ClassMethods
+    end
   end
 end
