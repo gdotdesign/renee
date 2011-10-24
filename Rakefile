@@ -67,7 +67,7 @@ end
 
 renee_gems_tasks = Hash[renee_gems.map{|rg| [rg, :"test_#{rg.gsub('-', '_')}"]}].freeze
 
-desc "Run tests for all padrino stack gems"
+desc "Run tests for all renee stack gems"
 task :test => renee_gems_tasks.values
 
 renee_gems_tasks.each do |g, tn|
@@ -77,7 +77,7 @@ renee_gems_tasks.each do |g, tn|
   end
 end
 
-desc "Generate documentation for the Padrino framework"
+desc "Generate documentation for the renee framework"
 task :doc do
   renee_gems.each do |name|
     sh "cd #{File.join(ROOT, name.to_s)} && #{Gem.ruby} -S rake doc"
