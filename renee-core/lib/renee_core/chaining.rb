@@ -13,8 +13,9 @@ module Renee
     module Chaining
       # @private
       class ChainingProxy
-        def initialize(target, proxy_blk)
-          @target, @proxy_blk, @calls = target, proxy_blk, []
+        def initialize(target, m, args)
+          @target, @calls = target, []
+          @calls << [m, args]
         end
 
         def method_missing(m, *args, &blk)
@@ -22,20 +23,19 @@ module Renee
           if blk.nil? && @target.class.private_method_defined?(:"#{m}_without_chain")
             self
           else
+            inner_args = []
             ret = nil
-            @proxy_blk.call(proc do |*inner_args|
-              callback = proc do |*callback_args|
-                inner_args.concat(callback_args)
-                if @calls.size == 0
-                  return blk.call(*inner_args) if blk
-                else
-                  call = @calls.shift
-                  ret = @target.send(call.at(0), *call.at(1), &callback)
-                end
+            callback = proc do |*callback_args|
+              inner_args.concat(callback_args)
+              if @calls.size == 0
+                return blk.call(*inner_args) if blk
+              else
+                call = @calls.shift
+                ret = @target.send(call.at(0), *call.at(1), &callback)
               end
-              call = @calls.shift
-              ret = @target.send(call.at(0), *call.at(1), &callback)
-            end)
+            end
+            call = @calls.shift
+            ret = @target.send(call.at(0), *call.at(1), &callback)
             ret
           end
         end
@@ -48,19 +48,12 @@ module Renee
             class_eval <<-EOT, __FILE__, __LINE__ + 1
               alias_method :#{m}_without_chain, :#{m}
               def #{m}(*args, &blk)
-                chain(blk) do |subblk|
-                  #{m}_without_chain(*args, &subblk)
-                end
+                blk.nil? ? ChainingProxy.new(self, #{m.inspect}, args) : #{m}_without_chain(*args, &blk)
               end
               private :#{m}_without_chain
             EOT
           end
         end
-      end
-
-      private
-      def chain(blk, &proxy)
-        blk ? yield(blk) : ChainingProxy.new(self, proxy)
       end
 
       def self.included(o)
