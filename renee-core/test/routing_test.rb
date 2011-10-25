@@ -118,7 +118,7 @@ describe Renee::Core::Routing do
       it "should not ignore trailing slashes if told not to" do
         type = { 'Content-Type' => 'text/plain' }
         mock_app do
-          exact_path('test') { get { halt [200,type,['test']] } }
+          path('test').empty { get { halt [200,type,['test']] } }
         end
         get '/test/'
         assert_equal 404,    response.status

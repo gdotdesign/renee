@@ -23,7 +23,7 @@ module Renee
       def path(p, &blk)
         p = p[1, p.size] if p[0] == ?/
         extension_part = detected_extension ? "|\\.#{Regexp.quote(detected_extension)}" : ""
-        part(/^\/#{Regexp.quote(p)}(\/?|$)(?=\/|$#{extension_part})/, &blk)
+        part(/^\/#{Regexp.quote(p)}(?=\/|$#{extension_part})/, &blk)
       end
       chain_method :path
 
@@ -34,17 +34,9 @@ module Renee
       end
       chain_method :whole_path
 
-      # Like #path, but doesn't automatically match trailing-slashes.
-      # @see #path
-      def exact_path(p, &blk)
-        p = p[1, part.size] if p[0] == ?/
-        part(/^\/#{Regexp.quote(p)}/, &blk)
-      end
-      chain_method :exact_path
-
       # Like #path, but doesn't look for leading slashes.
       def part(p, &blk)
-        p = /\/?#{Regexp.quote(p)}/ if p.is_a?(String)
+        p = /^\/?#{Regexp.quote(p)}/ if p.is_a?(String)
         if match = env['PATH_INFO'][p]
           with_path_part(match) { blk.call }
         end
@@ -192,18 +184,31 @@ module Renee
       end
       chain_method :delete
 
-      # Match only when the path has been completely consumed.
+      # Match only when the path is either '' or '/'.
       #
       # @example
       #   complete { halt [200, {}, "hello world"] }
       #
       # @api public
       def complete(&blk)
-        if env['PATH_INFO'] == '' || is_index_request
+        if env['PATH_INFO'] == '/' or env['PATH_INFO'] == ''
           with_path_part(env['PATH_INFO']) { blk.call }
         end
       end
       chain_method :complete
+
+      # Match only when the path is ''.
+      #
+      # @example
+      #   empty { halt [200, {}, "hello world"] }
+      #
+      # @api public
+      def empty(&blk)
+        if env['PATH_INFO'] == ''
+          with_path_part(env['PATH_INFO']) { blk.call }
+        end
+      end
+      chain_method :empty
 
       # Match variables within the query string.
       #

@@ -18,7 +18,7 @@ module Renee
         end
 
         def method_missing(m, *args, &blk)
-          @calls << [m, *args]
+          @calls << [m, args]
           if blk.nil? && @target.class.private_method_defined?(:"#{m}_without_chain")
             self
           else
@@ -48,7 +48,9 @@ module Renee
             class_eval <<-EOT, __FILE__, __LINE__ + 1
               alias_method :#{m}_without_chain, :#{m}
               def #{m}(*args, &blk)
-                chain(blk) { |subblk| #{m}_without_chain(*args, &subblk) }
+                chain(blk) do |subblk|
+                  #{m}_without_chain(*args, &subblk)
+                end
               end
               private :#{m}_without_chain
             EOT
