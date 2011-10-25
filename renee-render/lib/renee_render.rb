@@ -102,7 +102,7 @@ module Renee
     #
     def inline(data, engine, options = nil, &block)
       options, engine = engine, nil if engine.is_a?(Hash)
-      call_data = options.delete(:_caller) || Callsite.parse(caller.first)
+      call_data = options && options.delete(:_caller) || Callsite.parse(caller.first)
       render_setup(engine, options, block) do |view_options, views|
         body = data.is_a?(Proc) ? data : Proc.new { data }
         template = Tilt[engine]
