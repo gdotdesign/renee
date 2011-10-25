@@ -13,6 +13,8 @@ end
 
 # Top-level Renee constant.
 module Renee
+  # Main class for a Renee application. This class should be subclasses if you want to define your own Renee
+  # implementations.
   class Application < Core
     include Renee::Render
   end

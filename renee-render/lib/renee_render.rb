@@ -1,14 +1,16 @@
 require 'tilt'
 require 'callsite'
 
-# This module is responsible for handling the rendering of templates
-# using Tilt supporting all included template engines.
+# Top-level Renee constant
 module Renee
+  # This module is responsible for handling the rendering of templates
+  # using Tilt supporting all included template engines.
   module Render
     def self.included(o)
       o.extend(ClassMethods)
     end
 
+    # Class-methods included by this module.
     module ClassMethods
       # Gets or sets the views_path for an application.
       #
