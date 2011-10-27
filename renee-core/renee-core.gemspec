@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'rack', "~> 1.3.0"
   s.add_development_dependency 'minitest', "~> 2.6.1"
-  s.add_development_dependency 'bundler', "~> 1.0.10"
+  s.add_development_dependency 'bundler'
   s.add_development_dependency "rack-test", ">= 0.5.0"
   s.add_development_dependency "rake", "0.8.7"
 end

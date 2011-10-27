@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'renee-core', "= #{Renee::Core::VERSION}"
   s.add_development_dependency 'minitest', "~> 2.6.1"
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'bundler', "~> 1.0.10"
+  s.add_development_dependency 'bundler'
   s.add_development_dependency "rack-test", ">= 0.5.0"
   s.add_development_dependency "haml", ">= 2.2.0"
 end
