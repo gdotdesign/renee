@@ -232,6 +232,14 @@ module Renee
         end
       end
       chain_method :query
+      def query?(q, &blk)
+        case q
+        when Hash  then blk.call(Hash[q.map{|(k, v)| [k, transform(v, request[k.to_s]) || return]}])
+        when Array then blk.call(*q.map{|qk| request[qk.to_s]) or return })
+        else            query([q], &blk)
+        end
+      end
+      chain_method :query?
 
       # Yield block if the query string matches.
       #
