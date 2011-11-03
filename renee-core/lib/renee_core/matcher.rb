@@ -5,7 +5,7 @@ module Renee
       attr_accessor :name
 
       # @param [Regexp] matcher The regexp matcher to determine what is part of the variable.
-      def initialize(matcher,)
+      def initialize(matcher)
         @matcher = matcher
       end
 
@@ -56,11 +56,12 @@ module Renee
           match
         else
           if @error_handler1
-            &@error_handler1
+            raise ValidationError.new("validation error", &@error_handler1)
           end
           if @error_handler
             raise ClientError.new("There was an error interpreting the value #{val.inspect} for #{name.inspect}", &@error_handler)
           end
+        end
       end
     end
 

@@ -9,9 +9,16 @@ module Renee
       # @param [String] value The value to transform.
       # @return The transformed value or nil.
       def transform(type, value)
-        if self.class.variable_types.key?(type) and m = self.class.variable_types[type][value]
-          m.first == value ? m.last : nil
-        end
+        begin
+          if self.class.variable_types.key?(type) and m = self.class.variable_types[type][value]
+            m.first == value ? m.last : nil
+          end
+        rescue ValidationError => e
+          if e.response
+            instance_eval(&e.response)
+            nil
+          end
+        end  
       end
     end
   end

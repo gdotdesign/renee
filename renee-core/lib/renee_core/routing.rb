@@ -226,7 +226,7 @@ module Renee
       # @api public
       def query(q, &blk)
         case q
-        when Hash  then blk.call(*q.map{|(k, v)| [k, transform(v, request[k.to_s]) || return]}])
+        when Hash  then blk.call(*q.map{|(k, v)| transform(v, request[k.to_s]) || return})
         when Array then blk.call(*q.map{|qk| request[qk.to_s] or return })
         else            query([q], &blk)
         end
