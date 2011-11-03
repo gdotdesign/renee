@@ -42,7 +42,6 @@ module Renee
       # @yield The application block
       def app(&app)
         @application_block = app
-        @errors = []
         setup do
           register_variable_type :integer, IntegerMatcher
           register_variable_type :int, :integer
