@@ -226,20 +226,12 @@ module Renee
       # @api public
       def query(q, &blk)
         case q
-        when Hash  then blk.call(Hash[q.map{|(k, v)| [k, transform(v, request[k.to_s]) || return]}])
-        when Array then blk.call(*q.map{|qk| if (a = request[qk.to_s]) != "" then a end or return })
-        else            query([q], &blk)
-        end
-      end
-      chain_method :query
-      def equery(q, &blk)
-        case q
-        when Hash  then blk.call(Hash[q.map{|(k, v)| [k, transform(v, request[k.to_s]) || return]}])
+        when Hash  then blk.call(*q.map{|(k, v)| [k, transform(v, request[k.to_s]) || return]}])
         when Array then blk.call(*q.map{|qk| request[qk.to_s] or return })
         else            query([q], &blk)
         end
       end
-      chain_method :equery
+      chain_method :query
 
       # Yield block if the query string matches.
       #

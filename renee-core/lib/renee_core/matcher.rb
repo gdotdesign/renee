@@ -5,7 +5,7 @@ module Renee
       attr_accessor :name
 
       # @param [Regexp] matcher The regexp matcher to determine what is part of the variable.
-      def initialize(matcher)
+      def initialize(matcher,error)
         @matcher = matcher
       end
 
